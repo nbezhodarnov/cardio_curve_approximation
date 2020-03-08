@@ -11,6 +11,27 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
+    ui->widget->setMouseTracking(true);
+    verticalLine = new QCPCurve(ui->widget->xAxis, ui->widget->yAxis);
+    ui->widget->addPlottable(verticalLine);
+    verticalLine->setName("Vertical");
+    connect(ui->widget, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(mouseMoveEvent(QMouseEvent*)));
+}
+
+void MainWindow::mouseMoveEvent(QMouseEvent *event)
+{
+        double ystart = ui->widget->yAxis->range().lower;
+        double yend = ui->widget->yAxis->range().upper;
+        double key = ui->widget->xAxis->pixelToCoord(event->pos().x());
+
+        QVector<double> x(2), y(2);
+        x[0] = x[1] = key;
+        y[0] = ystart;
+        y[1] = yend;
+
+        verticalLine->setData(x, y);
+        ui->widget->replot();
 }
 
 MainWindow::~MainWindow()
