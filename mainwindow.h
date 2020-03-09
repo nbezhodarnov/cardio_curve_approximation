@@ -27,11 +27,16 @@ private slots:
 
     void mouseMoveEvent(QMouseEvent *event);
 
+    void mouseClickEvent(QMouseEvent *event);
+
 private:
     Ui::MainWindow *ui;
     QFile file;
-    QCPCurve *verticalLine;
-    QCPItemTracer *tracer;
+    QCPCurve *verticalLine, *start, *end;
+    bool end_turn;
+    double start_v, end_v;
+    QVector<double> x;
+    QVector<quint8> f;
 };
 
 #endif // MAINWINDOW_H

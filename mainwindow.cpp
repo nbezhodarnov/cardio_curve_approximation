@@ -10,13 +10,18 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
-    ui->setupUi(this);
+    x.resize(256);
+    f.resize(256);
 
-    ui->widget->setMouseTracking(true);
-    verticalLine = new QCPCurve(ui->widget->xAxis, ui->widget->yAxis);
-    ui->widget->addPlottable(verticalLine);
-    verticalLine->setName("Vertical");
-    connect(ui->widget, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(mouseMoveEvent(QMouseEvent*)));
+    ui->setupUi(this);
+    ui->widget->setVisible(false);
+
+    start = nullptr;
+    start_v = ui->widget->xAxis->range().upper;
+    end = nullptr;
+    end_v = ui->widget->xAxis->range().lower;
+    end_turn = false;
+    verticalLine = nullptr;
 }
 
 void MainWindow::mouseMoveEvent(QMouseEvent *event)
@@ -34,8 +39,91 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event)
         ui->widget->replot();
 }
 
+void MainWindow::mouseClickEvent(QMouseEvent *event)
+{
+        double ystart = ui->widget->yAxis->range().lower;
+        double yend = ui->widget->yAxis->range().upper;
+        double key = ui->widget->xAxis->pixelToCoord(event->pos().x());
+
+        qint16 i;
+        for (i = 0; i < 256; i++) {
+            if (x[i] >= key) {
+                break;
+            }
+        }
+        if (i != 0) {
+            if (abs(key - x[i]) > abs(x[i - 1] - key)) {
+                i--;
+            }
+        }
+        key = x[i];
+
+        QVector<double> x(2), y(2);
+        x[0] = x[1] = key;
+        y[0] = ystart;
+        y[1] = yend;
+
+        if (start == nullptr) {
+            start = new QCPCurve(ui->widget->xAxis, ui->widget->yAxis);
+            ui->widget->addPlottable(start);
+            start->setName("Start");
+            start->setPen(QPen(QBrush(QColor(Qt::red)), 1));
+            start->setData(x, y);
+            start_v = key;
+            end_turn = true;
+            ui->widget->replot();
+            return;
+        } else if (end == nullptr) {
+            end = new QCPCurve(ui->widget->xAxis, ui->widget->yAxis);
+            ui->widget->addPlottable(end);
+            end->setName("End");
+            end->setPen(QPen(QBrush(QColor(Qt::red)), 1));
+            end->setData(x, y);
+            end_v = key;
+            if (key < start_v) {
+                start->setVisible(false);
+            }
+            end_turn = false;
+        } else if (end_turn) {
+            end->setData(x, y);
+            end_v = key;
+            if (key < start_v) {
+                start->setVisible(false);
+            }
+            end_turn = false;
+            end->setVisible(true);
+        } else {
+            start->setData(x, y);
+            start_v = key;
+            if (key > end_v) {
+                end->setVisible(false);
+            }
+            end_turn = true;
+            start->setVisible(true);
+        }
+        ui->widget->replot();
+
+        if ((start->visible()) && (end->visible())) {
+            ui->approximation_start->setEnabled(true);
+        } else {
+            ui->approximation_start->setEnabled(false);
+        }
+}
+
 MainWindow::~MainWindow()
 {
+    if (verticalLine != nullptr) {
+        delete verticalLine;
+    }
+    if (start != nullptr) {
+        delete start;
+    }
+    if (end != nullptr) {
+        delete end;
+    }
+    if (file.isOpen()) {
+        file.close();
+    }
     delete ui;
 }
 
@@ -139,8 +227,7 @@ void MainWindow::on_experiment_choose_valueChanged(int arg1)
 
 void MainWindow::on_make_plot_clicked()
 {
-    QVector<double> f(256);
-    QVector<double> x(256);
+    QVector<double> f_temp(256);
     double step = 3.857;
 
     file.seek(1 + (ui->experiment_choose->value() - 1) * 768 + (ui->channel_choose->value() - 1) * 256);
@@ -156,13 +243,14 @@ void MainWindow::on_make_plot_clicked()
         if ((unsigned char)temp > max) {
             max = temp;
         }
+        f_temp[i] = (unsigned char)temp;
         f[i] = (unsigned char)temp;
     }
     //ui->widget->setInteractions(QCP::iSelectPlottables);
 
     ui->widget->clearGraphs();
     ui->widget->addGraph();
-    ui->widget->graph(0)->setData(x, f);
+    ui->widget->graph(0)->setData(x, f_temp);
 
     ui->widget->xAxis->setLabel("x");
     ui->widget->yAxis->setLabel("y");
@@ -170,6 +258,18 @@ void MainWindow::on_make_plot_clicked()
     ui->widget->xAxis->setRange(x[0], x[255]);
 
     ui->widget->yAxis->setRange(min, max);
+
+    if (verticalLine == nullptr) {
+        ui->widget->setVisible(true);
+        ui->widget->setEnabled(true);
+        ui->widget->setMouseTracking(true);
+        verticalLine = new QCPCurve(ui->widget->xAxis, ui->widget->yAxis);
+        ui->widget->addPlottable(verticalLine);
+        verticalLine->setName("Vertical");
+        verticalLine->setPen(QPen(QBrush(QColor(Qt::black)), 1));
+        connect(ui->widget, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(mouseMoveEvent(QMouseEvent*)));
+        connect(ui->widget, SIGNAL(mousePress(QMouseEvent*)), this, SLOT(mouseClickEvent(QMouseEvent*)));
+    }
 
     ui->widget->replot();
 }
