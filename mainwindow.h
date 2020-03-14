@@ -29,6 +29,10 @@ private slots:
 
     void mouseClickEvent(QMouseEvent *event);
 
+    void on_approximation_start_clicked();
+
+    void on_plotrender_range_changed(const QCPRange &  newRange);
+
 private:
     Ui::MainWindow *ui;
     QFile file;
