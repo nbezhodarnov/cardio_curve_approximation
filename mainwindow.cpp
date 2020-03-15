@@ -6,6 +6,10 @@
 #include <QString>
 #include <QFile>
 
+#include <thread>
+#include <sys/prctl.h>
+#include <unordered_map>
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -26,8 +30,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
 void MainWindow::mouseMoveEvent(QMouseEvent *event)
 {
-        double ystart = ui->widget->yAxis->range().lower;
-        double yend = ui->widget->yAxis->range().upper;
+        double ystart = min_y - 3;
+        double yend = max_y + 3;
         double key = ui->widget->xAxis->pixelToCoord(event->pos().x());
 
         QVector<double> x(2), y(2);
@@ -39,10 +43,32 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event)
         ui->widget->replot();
 }
 
+void MainWindow::mousePressEvent(QMouseEvent *event)
+{
+    if (event->button() == Qt::LeftButton) {
+            xAxis[0] = ui->widget->xAxis->range().lower;
+            xAxis[1] = ui->widget->xAxis->range().upper;
+            yAxis[0] = ui->widget->yAxis->range().lower;
+            yAxis[1] = ui->widget->yAxis->range().upper;
+        }
+}
+
+void MainWindow::mouseReleaseEvent(QMouseEvent *event)
+{
+    if (event->button() == Qt::LeftButton) {
+            if (xAxis[0] == ui->widget->xAxis->range().lower &&
+                xAxis[1] == ui->widget->xAxis->range().upper &&
+                yAxis[0] == ui->widget->yAxis->range().lower &&
+                yAxis[1] == ui->widget->yAxis->range().upper) {
+                mouseClickEvent(event);
+            }
+    }
+}
+
 void MainWindow::mouseClickEvent(QMouseEvent *event)
 {
-        double ystart = ui->widget->yAxis->range().lower;
-        double yend = ui->widget->yAxis->range().upper;
+        double ystart = min_y - 3;
+        double yend = max_y + 3;
         double key = ui->widget->xAxis->pixelToCoord(event->pos().x());
 
         qint16 i;
@@ -110,11 +136,28 @@ void MainWindow::mouseClickEvent(QMouseEvent *event)
         }
 }
 
-void MainWindow::on_plotrender_range_changed(const QCPRange &  newRange)
+void MainWindow::on_plotrender_xaxis_range_changed(const QCPRange &newRange)
 {
-    if (newRange.lower < x[0] || newRange.upper > x[255]) {
-        ui->widget->xAxis->setRange(x[0], x[255]);
+    double lower = newRange.lower, upper = newRange.upper;
+    if (lower < x[0]) {
+        lower = x[0];
     }
+    if (upper > x[255]) {
+        upper = x[255];
+    }
+    ui->widget->xAxis->setRange(lower, upper);
+}
+
+void MainWindow::on_plotrender_yaxis_range_changed(const QCPRange &newRange)
+{
+    double lower = newRange.lower, upper = newRange.upper;
+    if (lower < min_y - 3) {
+        lower = min_y - 3;
+    }
+    if (upper > max_y + 3) {
+        upper = max_y + 3;
+    }
+    ui->widget->yAxis->setRange(lower, upper);
 }
 
 MainWindow::~MainWindow()
@@ -136,6 +179,7 @@ MainWindow::~MainWindow()
 
 qint64 OpenFileError() {
     QMessageBox msgBox;
+    msgBox.setWindowTitle(QString::fromUtf8("Ошибка"));
     msgBox.setText(QString::fromUtf8("Произошла ошибка при открытии файла."));
     msgBox.setInformativeText(QString::fromUtf8("Желаете открыть другой файл?"));
     msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
@@ -253,10 +297,14 @@ void MainWindow::on_make_plot_clicked()
         f_temp[i] = (unsigned char)temp;
         f[i] = (unsigned char)temp;
     }
-    ui->widget->setInteractions(QCP::iRangeZoom);
+    min_y = min;
+    max_y = max;
+    if (ui->widget->graphCount() == 0) {
+        ui->widget->setInteractions(QCP::iRangeZoom | QCP::iRangeDrag);
 
-    ui->widget->clearGraphs();
-    ui->widget->addGraph();
+        ui->widget->clearGraphs();
+        ui->widget->addGraph();
+    }
     ui->widget->graph(0)->setData(x, f_temp);
 
     ui->widget->xAxis->setLabel("x");
@@ -275,15 +323,38 @@ void MainWindow::on_make_plot_clicked()
         verticalLine->setName("Vertical");
         verticalLine->setPen(QPen(QBrush(QColor(Qt::black)), 1));
         connect(ui->widget, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(mouseMoveEvent(QMouseEvent*)));
-        connect(ui->widget, SIGNAL(mousePress(QMouseEvent*)), this, SLOT(mouseClickEvent(QMouseEvent*)));
-        connect(ui->widget->xAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(on_plotrender_range_changed(QCPRange)));
+        connect(ui->widget, SIGNAL(mousePress(QMouseEvent*)), this, SLOT(mousePressEvent(QMouseEvent*)));
+        connect(ui->widget, SIGNAL(mouseRelease(QMouseEvent*)), this, SLOT(mouseReleaseEvent(QMouseEvent*)));
+        connect(ui->widget->xAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(on_plotrender_xaxis_range_changed(QCPRange)));
+        connect(ui->widget->yAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(on_plotrender_yaxis_range_changed(QCPRange)));
     }
 
     ui->widget->replot();
 }
 
+/*qint64 PleaseWaitWindow() {
+    QMessageBox msgBox;
+    msgBox.setText(QString::fromUtf8("Произошла ошибка при открытии файла."));
+    msgBox.setInformativeText(QString::fromUtf8("Желаете открыть другой файл?"));
+    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    msgBox.setDefaultButton(QMessageBox::Yes);
+    return msgBox.exec();
+}*/
+
+QMessageBox* MainWindow::PleaseWaitWindow() {
+    prctl(PR_SET_NAME,"pleaswaitwindow",0,0,0);
+    QMessageBox *msgBox = new QMessageBox(this);
+    msgBox->setWindowTitle(QString::fromUtf8("Пожалуйста, подождите"));
+    msgBox->setText(QString::fromUtf8("Пожалуйста, подождите. Идут вычисления."));
+    msgBox->setStandardButtons(0);
+    msgBox->exec();
+    return msgBox;
+}
+
 void MainWindow::on_approximation_start_clicked()
 {
+    //QMessageBox *msgBox = PleaseWaitWindow();
+
     QTextStream out(stdout);
     quint8 start = 0, end;
     while (x[start] != start_v) {
@@ -638,12 +709,35 @@ void MainWindow::on_approximation_start_clicked()
     out << "a2 = " << a2 << ", b2 = " << b2 << ", c2 = " << c2 << '\n' << flush;
 
     QVector<double> x_result(n), result(n), e_first(n), e_second(n);
+    double max = 0;
     for (quint8 i = 0; i < n; i++) {
         x_result[i] = x[i + start];
-        result[i] = coefficient + a1 * exp(-b1 * pow(x[i + start] - c1, 2)) + a2 * exp(-b2 * pow(x[i + start] - c2, 2));
-        e_first[i] = coefficient + a1 * exp(-b1 * pow(x[i + start] - c1, 2));
-        e_second[i] = coefficient + a2 * exp(-b2 * pow(x[i + start] - c2, 2));
+        result[i] = coefficient + a1 * exp(-b1 * pow(x_result[i] - c1, 2)) + a2 * exp(-b2 * pow(x_result[i] - c2, 2));
+        e_first[i] = coefficient + a1 * exp(-b1 * pow(x_result[i] - c1, 2));
+        e_second[i] = coefficient + a2 * exp(-b2 * pow(x_result[i] - c2, 2));
+        if (max < result[i]) {
+            max = result[i];
+        }
         //out << x_result[i] << " - " << result[i] << '\n' << flush;
+    }
+    if (max > max_y) {
+        max_y = max;
+        if (this->start->visible()) {
+            QVector<double> x_temp(2), y_temp(2);
+            x_temp[0] = x_temp[1] = this->start_v;
+            y_temp[0] = min_y - 3;
+            y_temp[1] = max_y + 3;
+            this->start->setData(x_temp, y_temp);
+            ui->widget->replot();
+        }
+        if (this->end->visible()) {
+            QVector<double> x_temp(2), y_temp(2);
+            x_temp[0] = x_temp[1] = this->end_v;
+            y_temp[0] = min_y - 3;
+            y_temp[1] = max_y + 3;
+            this->end->setData(x_temp, y_temp);
+            ui->widget->replot();
+        }
     }
     //out << coefficient << '\n' << flush;
     if (ui->widget->graphCount() <= 1) {
@@ -662,4 +756,6 @@ void MainWindow::on_approximation_start_clicked()
     for (int i = start; i < end; ++i) {
         f[i] += coefficient;
     }
+
+    //delete msgBox;
 }
