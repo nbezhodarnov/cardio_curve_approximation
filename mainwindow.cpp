@@ -332,28 +332,15 @@ void MainWindow::on_make_plot_clicked()
     ui->widget->replot();
 }
 
-/*qint64 PleaseWaitWindow() {
-    QMessageBox msgBox;
-    msgBox.setText(QString::fromUtf8("Произошла ошибка при открытии файла."));
-    msgBox.setInformativeText(QString::fromUtf8("Желаете открыть другой файл?"));
-    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-    msgBox.setDefaultButton(QMessageBox::Yes);
-    return msgBox.exec();
-}*/
-
-QMessageBox* MainWindow::PleaseWaitWindow() {
-    prctl(PR_SET_NAME,"pleaswaitwindow",0,0,0);
-    QMessageBox *msgBox = new QMessageBox(this);
-    msgBox->setWindowTitle(QString::fromUtf8("Пожалуйста, подождите"));
-    msgBox->setText(QString::fromUtf8("Пожалуйста, подождите. Идут вычисления."));
-    msgBox->setStandardButtons(0);
-    msgBox->exec();
-    return msgBox;
-}
-
 void MainWindow::on_approximation_start_clicked()
 {
-    //QMessageBox *msgBox = PleaseWaitWindow();
+    QMessageBox msgBox(this);
+    msgBox.setWindowTitle(QString::fromUtf8("Пожалуйста, подождите"));
+    msgBox.setText(QString::fromUtf8("Пожалуйста, подождите. Идут вычисления."));
+    msgBox.setStandardButtons(0);
+    msgBox.setModal(true);
+    msgBox.show();
+    QApplication::processEvents();
 
     QTextStream out(stdout);
     quint8 start = 0, end;
@@ -534,6 +521,7 @@ void MainWindow::on_approximation_start_clicked()
                 for (uint8_t l = 0; l < 5; ++l) {
                     for (uint8_t m = 0; m < 5; ++m) {
                         for (uint8_t r = 0; r < 5; ++r) {
+                            QApplication::processEvents();
                             temp = 0;
                             for (int p = 0; p < numbers_of_points; ++p) {
                                 center_correcter = 1;
@@ -756,6 +744,4 @@ void MainWindow::on_approximation_start_clicked()
     for (int i = start; i < end; ++i) {
         f[i] += coefficient;
     }
-
-    //delete msgBox;
 }

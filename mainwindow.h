@@ -47,8 +47,6 @@ private:
     double start_v, end_v, min_y, max_y, xAxis[2], yAxis[2];
     QVector<double> x;
     QVector<quint8> f;
-
-    QMessageBox* PleaseWaitWindow();
 };
 
 #endif // MAINWINDOW_H
