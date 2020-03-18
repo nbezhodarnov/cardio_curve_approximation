@@ -143,6 +143,22 @@
 аппроксимацию</string>
     </property>
    </widget>
+   <widget class="QPushButton" name="results">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>210</y>
+      <width>131</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Результаты</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
@@ -150,7 +166,7 @@
      <x>0</x>
      <y>0</y>
      <width>664</width>
-     <height>30</height>
+     <height>23</height>
     </rect>
    </property>
   </widget>

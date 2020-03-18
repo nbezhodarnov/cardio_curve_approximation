@@ -744,4 +744,47 @@ void MainWindow::on_approximation_start_clicked()
     for (int i = start; i < end; ++i) {
         f[i] += coefficient;
     }
+    coefficients[0] = a1;
+    coefficients[1] = b1;
+    coefficients[2] = c1;
+    coefficients[3] = a2;
+    coefficients[4] = b2;
+    coefficients[5] = c2;
+    ui->results->setEnabled(true);
+}
+
+void MainWindow::on_results_clicked()
+{
+    QMessageBox msgBox(this);
+    msgBox.setWindowTitle(QString::fromUtf8("Результаты"));
+    msgBox.setText(QString::fromUtf8("Результаты вычислений:\n") +
+            QString::fromUtf8("Экспоненты:\na1 = ") + QString::number(coefficients[0]) +
+            QString::fromUtf8(", b1 = ") + QString::number(coefficients[1]) +
+            QString::fromUtf8(", c1 = ") + QString::number(coefficients[2]) +
+            QString::fromUtf8("\na2 = ") + QString::number(coefficients[3]) +
+            QString::fromUtf8(", b2 = ") + QString::number(coefficients[4]) +
+            QString::fromUtf8(", c2 = ") + QString::number(coefficients[5]) +
+            QString::fromUtf8("\nПервая производная:\n") +
+            QString::number(-2 * coefficients[0] * coefficients[1]) +
+            QString::fromUtf8("(x-") + QString::number(coefficients[2]) + QString::fromUtf8(")exp{") +
+            QString::number(-coefficients[1]) + QString::fromUtf8("(x-") + QString::number(coefficients[2]) + QString::fromUtf8(")^2}") +
+            QString::number(-2 * coefficients[3] * coefficients[4]) +
+            QString::fromUtf8("(x-") + QString::number(coefficients[5]) + QString::fromUtf8(")exp{") +
+            QString::number(-coefficients[4]) + QString::fromUtf8("(x-") + QString::number(coefficients[5]) +
+            QString::fromUtf8(")^2}") +
+            QString::fromUtf8("\nВторая производная:\n") +
+            QString::number(-2 * coefficients[0] * coefficients[1]) +
+            QString::fromUtf8("exp{") + QString::number(-coefficients[1]) +
+            QString::fromUtf8("(x-") + QString::number(coefficients[2]) + QString::fromUtf8(")^2}+") +
+            QString::number(4 * coefficients[0] * pow(coefficients[1], 2)) +
+            QString::fromUtf8("(x-") + QString::number(coefficients[2]) + QString::fromUtf8(")^(2)exp{") +
+            QString::number(-coefficients[1]) + QString::fromUtf8("(x-") + QString::number(coefficients[2]) + QString::fromUtf8(")^2}\n") +
+            QString::number(-2 * coefficients[3] * coefficients[4]) +
+            QString::fromUtf8("exp{") + QString::number(-coefficients[4]) +
+            QString::fromUtf8("(x-") + QString::number(coefficients[5]) + QString::fromUtf8(")^2}+") +
+            QString::number(4 * coefficients[3] * pow(coefficients[4], 2)) +
+            QString::fromUtf8("(x-") + QString::number(coefficients[5]) + QString::fromUtf8(")^(2)exp{") +
+            QString::number(-coefficients[4]) + QString::fromUtf8("(x-") + QString::number(coefficients[5]) + QString::fromUtf8(")^2}"));
+    msgBox.setStandardButtons(QMessageBox::Close);
+    msgBox.exec();
 }

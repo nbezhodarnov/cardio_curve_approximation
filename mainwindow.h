@@ -39,12 +39,14 @@ private slots:
 
     void on_plotrender_yaxis_range_changed(const QCPRange &);
 
+    void on_results_clicked();
+
 private:
     Ui::MainWindow *ui;
     QFile file;
     QCPCurve *verticalLine, *start, *end;
     bool end_turn;
-    double start_v, end_v, min_y, max_y, xAxis[2], yAxis[2];
+    double start_v, end_v, min_y, max_y, xAxis[2], yAxis[2], coefficients[6];
     QVector<double> x;
     QVector<quint8> f;
 };
