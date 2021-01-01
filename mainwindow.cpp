@@ -6,9 +6,11 @@
 #include <QString>
 #include <QFile>
 
+/*
 #include <thread>
 #include <sys/prctl.h>
 #include <unordered_map>
+*/
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -19,6 +21,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->setupUi(this);
     ui->widget->setVisible(false);
+    ui->widget->setEnabled(false);
 
     start = nullptr;
     start_v = ui->widget->xAxis->range().upper;
@@ -30,114 +33,129 @@ MainWindow::MainWindow(QWidget *parent) :
 
 void MainWindow::mouseMoveEvent(QMouseEvent *event)
 {
-        double ystart = min_y - 3;
-        double yend = max_y + 3;
-        double key = ui->widget->xAxis->pixelToCoord(event->pos().x());
+    if (verticalLine == nullptr) {
+        return;
+    }
+    double ystart = min_y - 3;
+    double yend = max_y + 3;
+    double key = ui->widget->xAxis->pixelToCoord(event->pos().x());
 
-        QVector<double> x(2), y(2);
-        x[0] = x[1] = key;
-        y[0] = ystart;
-        y[1] = yend;
+    QVector<double> x(2), y(2);
+    x[0] = x[1] = key;
+    y[0] = ystart;
+    y[1] = yend;
 
-        verticalLine->setData(x, y);
-        ui->widget->replot();
+    verticalLine->setData(x, y);
+    ui->widget->replot();
 }
 
 void MainWindow::mousePressEvent(QMouseEvent *event)
 {
+    if (verticalLine == nullptr) {
+        return;
+    }
     if (event->button() == Qt::LeftButton) {
-            xAxis[0] = ui->widget->xAxis->range().lower;
-            xAxis[1] = ui->widget->xAxis->range().upper;
-            yAxis[0] = ui->widget->yAxis->range().lower;
-            yAxis[1] = ui->widget->yAxis->range().upper;
-        }
+        xAxis[0] = ui->widget->xAxis->range().lower;
+        xAxis[1] = ui->widget->xAxis->range().upper;
+        yAxis[0] = ui->widget->yAxis->range().lower;
+        yAxis[1] = ui->widget->yAxis->range().upper;
+    }
 }
 
 void MainWindow::mouseReleaseEvent(QMouseEvent *event)
 {
+    if (verticalLine == nullptr) {
+        return;
+    }
     if (event->button() == Qt::LeftButton) {
-            if (xAxis[0] == ui->widget->xAxis->range().lower &&
+        if (xAxis[0] == ui->widget->xAxis->range().lower &&
                 xAxis[1] == ui->widget->xAxis->range().upper &&
                 yAxis[0] == ui->widget->yAxis->range().lower &&
                 yAxis[1] == ui->widget->yAxis->range().upper) {
-                mouseClickEvent(event);
-            }
+            mouseClickEvent(event);
+        }
     }
 }
 
 void MainWindow::mouseClickEvent(QMouseEvent *event)
 {
-        double ystart = min_y - 3;
-        double yend = max_y + 3;
-        double key = ui->widget->xAxis->pixelToCoord(event->pos().x());
+    if (verticalLine == nullptr) {
+        return;
+    }
+    double ystart = min_y - 3;
+    double yend = max_y + 3;
+    double key = ui->widget->xAxis->pixelToCoord(event->pos().x());
 
-        qint16 i;
-        for (i = 0; i < 256; i++) {
-            if (x[i] >= key) {
-                break;
-            }
+    qint16 i;
+    for (i = 0; i < 256; i++) {
+        if (x[i] >= key) {
+            break;
         }
-        if (i != 0) {
-            if (abs(key - x[i]) > abs(x[i - 1] - key)) {
-                i--;
-            }
+    }
+    if (i != 0) {
+        if (abs(key - x[i]) > abs(x[i - 1] - key)) {
+            i--;
         }
-        key = x[i];
+    }
+    key = x[i];
 
-        QVector<double> x(2), y(2);
-        x[0] = x[1] = key;
-        y[0] = ystart;
-        y[1] = yend;
+    QVector<double> x(2), y(2);
+    x[0] = x[1] = key;
+    y[0] = ystart;
+    y[1] = yend;
 
-        if (start == nullptr) {
-            start = new QCPCurve(ui->widget->xAxis, ui->widget->yAxis);
-            ui->widget->addPlottable(start);
-            start->setName("Start");
-            start->setPen(QPen(QBrush(QColor(Qt::red)), 1));
-            start->setData(x, y);
-            start_v = key;
-            end_turn = true;
-            ui->widget->replot();
-            return;
-        } else if (end == nullptr) {
-            end = new QCPCurve(ui->widget->xAxis, ui->widget->yAxis);
-            ui->widget->addPlottable(end);
-            end->setName("End");
-            end->setPen(QPen(QBrush(QColor(Qt::red)), 1));
-            end->setData(x, y);
-            end_v = key;
-            if (key < start_v) {
-                start->setVisible(false);
-            }
-            end_turn = false;
-        } else if (end_turn) {
-            end->setData(x, y);
-            end_v = key;
-            if (key < start_v) {
-                start->setVisible(false);
-            }
-            end_turn = false;
-            end->setVisible(true);
-        } else {
-            start->setData(x, y);
-            start_v = key;
-            if (key > end_v) {
-                end->setVisible(false);
-            }
-            end_turn = true;
-            start->setVisible(true);
-        }
+    if (start == nullptr) {
+        start = new QCPCurve(ui->widget->xAxis, ui->widget->yAxis);
+        ui->widget->addPlottable(start);
+        start->setName("Start");
+        start->setPen(QPen(QBrush(QColor(Qt::red)), 1));
+        start->setData(x, y);
+        start_v = key;
+        end_turn = true;
         ui->widget->replot();
-
-        if ((start->visible()) && (end->visible())) {
-            ui->approximation_start->setEnabled(true);
-        } else {
-            ui->approximation_start->setEnabled(false);
+        return;
+    } else if (end == nullptr) {
+        end = new QCPCurve(ui->widget->xAxis, ui->widget->yAxis);
+        ui->widget->addPlottable(end);
+        end->setName("End");
+        end->setPen(QPen(QBrush(QColor(Qt::red)), 1));
+        end->setData(x, y);
+        end_v = key;
+        if (key < start_v) {
+            start->setVisible(false);
         }
+        end_turn = false;
+    } else if (end_turn) {
+        end->setData(x, y);
+        end_v = key;
+        if (key < start_v) {
+            start->setVisible(false);
+        }
+        end_turn = false;
+        end->setVisible(true);
+    } else {
+        start->setData(x, y);
+        start_v = key;
+        if (key > end_v) {
+            end->setVisible(false);
+        }
+        end_turn = true;
+        start->setVisible(true);
+    }
+    ui->widget->replot();
+
+    if ((start->visible()) && (end->visible())) {
+        ui->approximation_start->setEnabled(true);
+    } else {
+        ui->approximation_start->setEnabled(false);
+    }
 }
 
 void MainWindow::on_plotrender_xaxis_range_changed(const QCPRange &newRange)
 {
+    if (verticalLine == nullptr) {
+        return;
+    }
     double lower = newRange.lower, upper = newRange.upper;
     if (lower < x[0]) {
         lower = x[0];
@@ -150,6 +168,9 @@ void MainWindow::on_plotrender_xaxis_range_changed(const QCPRange &newRange)
 
 void MainWindow::on_plotrender_yaxis_range_changed(const QCPRange &newRange)
 {
+    if (verticalLine == nullptr) {
+        return;
+    }
     double lower = newRange.lower, upper = newRange.upper;
     if (lower < min_y - 3) {
         lower = min_y - 3;
@@ -162,7 +183,7 @@ void MainWindow::on_plotrender_yaxis_range_changed(const QCPRange &newRange)
 
 MainWindow::~MainWindow()
 {
-    if (verticalLine != nullptr) {
+    /*if (verticalLine != nullptr) {
         delete verticalLine;
     }
     if (start != nullptr) {
@@ -170,7 +191,7 @@ MainWindow::~MainWindow()
     }
     if (end != nullptr) {
         delete end;
-    }
+    }*/
     if (file.isOpen()) {
         file.close();
     }
@@ -242,7 +263,7 @@ void MainWindow::on_open_file_clicked()
             continue;
         } else {
             experiments_count = file_size / 768;
-            if (experiments_count == 0) {
+            if ((experiments_count == 0) || (file_size % 768 != 0)) {
                 file.close();
                 ret = OpenFileError();
                 continue;
@@ -513,53 +534,121 @@ void MainWindow::on_approximation_start_clicked()
     int little_changes_count = 0;
     long double reset[6];
     while (min_value > 18) {
-    q = false;
-    previous_value = min_value;
-    for (uint8_t i = 0; i < 5; ++i) {
-        for (uint8_t j = 0; j < 5; ++j) {
-            for (uint8_t k = 0; k < 5; ++k) {
-                for (uint8_t l = 0; l < 5; ++l) {
-                    for (uint8_t m = 0; m < 5; ++m) {
-                        for (uint8_t r = 0; r < 5; ++r) {
-                            QApplication::processEvents();
-                            temp = 0;
-                            for (int p = 0; p < numbers_of_points; ++p) {
-                                center_correcter = 1;
-                                if ((p > n * 0.25) && (p < n * 0.75)) {
-                                    if (need_center_correction) {
-                                        center_correcter = 8;
+        q = false;
+        previous_value = min_value;
+        for (uint8_t i = 0; i < 5; ++i) {
+            for (uint8_t j = 0; j < 5; ++j) {
+                for (uint8_t k = 0; k < 5; ++k) {
+                    for (uint8_t l = 0; l < 5; ++l) {
+                        for (uint8_t m = 0; m < 5; ++m) {
+                            for (uint8_t r = 0; r < 5; ++r) {
+                                QApplication::processEvents();
+                                temp = 0;
+                                for (int p = 0; p < numbers_of_points; ++p) {
+                                    center_correcter = 1;
+                                    if ((p > n * 0.25) && (p < n * 0.75)) {
+                                        if (need_center_correction) {
+                                            center_correcter = 8;
+                                        }
+                                    }
+                                    long double approximating_function = - std::abs(a1 - (2 - i) * step1) * exp(-std::abs(b1 - (2 - j) * step2) * pow(x[start + p * (n / numbers_of_points)] - c1 + (2 - k) * step3, 2)) - std::abs(a2 - (2 - l) * step1) * exp(-std::abs(b2 - (2 - m) * step2) * pow(x[start + p * (n / numbers_of_points)] - c2 + (2 - r) * step3, 2));
+                                    if ((f[start + p * n / numbers_of_points] + coefficient < 128) || (f[start + p * n / numbers_of_points] + coefficient + approximating_function > 0)) {
+                                        temp += center_correcter * std::abs(f[start + p * (n / numbers_of_points)] + approximating_function);
                                     }
                                 }
-                                if (f[start + p * n / numbers_of_points] + coefficient < 128) {
-                                    temp += center_correcter * std::abs(f[start + p * (n / numbers_of_points)] - std::abs(a1 - (2 - i) * step1) * exp(-std::abs(b1 - (2 - j) * step2) * pow(x[start + p * (n / numbers_of_points)] - c1 + (2 - k) * step3, 2)) - std::abs(a2 - (2 - l) * step1) * exp(-std::abs(b2 - (2 - m) * step2) * pow(x[start + p * (n / numbers_of_points)] - c2 + (2 - r) * step3, 2)));
+                                if (temp < min_value) {
+                                    q = true;
+                                    min_value = temp;
+                                    min_point_indexes[0] = i;
+                                    min_point_indexes[1] = j;
+                                    min_point_indexes[2] = k;
+                                    min_point_indexes[3] = l;
+                                    min_point_indexes[4] = m;
+                                    min_point_indexes[5] = r;
                                 }
-                            }
-                            if (temp < min_value) {
-                                q = true;
-                                min_value = temp;
-                                min_point_indexes[0] = i;
-                                min_point_indexes[1] = j;
-                                min_point_indexes[2] = k;
-                                min_point_indexes[3] = l;
-                                min_point_indexes[4] = m;
-                                min_point_indexes[5] = r;
                             }
                         }
                     }
                 }
             }
         }
-    }
-    if (!q) {
-        step1 /= 10;
-        step2 /= 10;
-        step3 /= 10;
-        if (step1 < 1e-20) {
-            step1 = 0.5;
-            step2 = 0.01;
-            step3 = 0.1;
+        if (!q) {
+            step1 /= 10;
+            step2 /= 10;
+            step3 /= 10;
+            if (step1 < 1e-20) {
+                step1 = 0.5;
+                step2 = 0.01;
+                step3 = 0.1;
 
-            if (((min_value > 160) && (!long_line)) || ((long_line) && (min_value > 200))) {
+                if (((min_value > 160) && (!long_line)) || ((long_line) && (min_value > 200))) {
+                    temp = min_value + 301;
+                    reset[0] = a1;
+                    reset[1] = b1;
+                    reset[2] = c1;
+                    reset[3] = a2;
+                    reset[4] = b2;
+                    reset[5] = c2;
+                    while (temp - min_value > 300) {
+                        a1 = reset[0] + (rand() % 100 - 50) / 1.0;
+                        b1 = reset[1] + (rand() % 10 - 5) / 10.0;
+                        c1 = reset[2] + (rand() % 10 - 5) / 1.0;
+                        a2 = reset[3] + (rand() % 100 - 50) / 1.0;
+                        b2 = reset[4] + (rand() % 10 - 5) / 10.0;
+                        c2 = reset[5] + (rand() % 10 - 5) / 1.0;
+
+                        temp = 0;
+                        for (int p = 0; p < numbers_of_points; ++p) {
+                            center_correcter = 1;
+                            if ((p > n * 0.25) && (p < n * 0.75)) {
+                                if (need_center_correction) {
+                                    center_correcter = 8;
+                                }
+                            }
+                            if (f[start + p * n / numbers_of_points] + coefficient < 128) {
+                                temp += center_correcter * std::abs(f[start + p * (n / numbers_of_points)] - std::abs(a1) * exp(-std::abs(b1) * pow(x[start + p * (n / numbers_of_points)] - c1, 2)) - std::abs(a2) * exp(-std::abs(b2) * pow(x[start + p * (n / numbers_of_points)] - c2, 2)));
+                            }
+                        }
+                    }
+                }
+
+                min_value = temp;
+                counter = 0;
+            }
+            continue;
+        }
+        a1 -= (2 - min_point_indexes[0]) * step1;
+        b1 -= (2 - min_point_indexes[1]) * step2;
+        c1 -= (2 - min_point_indexes[2]) * step3;
+        a2 -= (2 - min_point_indexes[3]) * step1;
+        b2 -= (2 - min_point_indexes[4]) * step2;
+        c2 -= (2 - min_point_indexes[5]) * step3;
+        if ((std::abs(previous_value - min_value) < 0.0001) && (((min_value < 160) && (!long_line)) || ((long_line) && (min_value < 200)))) {
+            little_changes_count++;
+            if (little_changes_count >= 10) {
+                break;
+            }
+        } else {
+            little_changes_count = 0;
+        }
+        if ((min_point_indexes[0] % 4 != 0) && (min_point_indexes[1] % 4 != 0) && (min_point_indexes[2] % 4 != 0) && (min_point_indexes[3] % 4 != 0) && (min_point_indexes[4] % 4 != 0) && (min_point_indexes[5] % 4 != 0)) {
+            step1 /= 10;
+            step2 /= 10;
+            step3 /= 10;
+            //counter = 0;
+        } else {
+            counter++;
+            if ((counter % 10 == 0) && (step2 < 0.01)) {
+                step1 = 0.5 * (counter / 10);
+                step2 = 0.01 * (counter / 10);
+                step3 = 0.1 * (counter / 10);
+                //counter = 0;
+            }
+            if ((counter % 100 == 0) && (min_value > 160)) {
+                step1 = 0.5;
+                step2 = 0.01;
+                step3 = 0.1;
+
                 temp = min_value + 301;
                 reset[0] = a1;
                 reset[1] = b1;
@@ -588,103 +677,36 @@ void MainWindow::on_approximation_start_clicked()
                         }
                     }
                 }
+
+                min_value = temp;
+                counter = 0;
             }
-
-            min_value = temp;
-            counter = 0;
         }
-        continue;
-    }
-    a1 -= (2 - min_point_indexes[0]) * step1;
-    b1 -= (2 - min_point_indexes[1]) * step2;
-    c1 -= (2 - min_point_indexes[2]) * step3;
-    a2 -= (2 - min_point_indexes[3]) * step1;
-    b2 -= (2 - min_point_indexes[4]) * step2;
-    c2 -= (2 - min_point_indexes[5]) * step3;
-    if ((std::abs(previous_value - min_value) < 0.0001) && (((min_value < 160) && (!long_line)) || ((long_line) && (min_value < 200)))) {
-        little_changes_count++;
-        if (little_changes_count >= 10) {
-            break;
-        }
-    } else {
-        little_changes_count = 0;
-    }
-    if ((min_point_indexes[0] % 4 != 0) && (min_point_indexes[1] % 4 != 0) && (min_point_indexes[2] % 4 != 0) && (min_point_indexes[3] % 4 != 0) && (min_point_indexes[4] % 4 != 0) && (min_point_indexes[5] % 4 != 0)) {
-        step1 /= 10;
-        step2 /= 10;
-        step3 /= 10;
-        //counter = 0;
-    } else {
-        counter++;
-        if ((counter % 10 == 0) && (step2 < 0.01)) {
-            step1 = 0.5 * (counter / 10);
-            step2 = 0.01 * (counter / 10);
-            step3 = 0.1 * (counter / 10);
-            //counter = 0;
-        }
-        if ((counter % 100 == 0) && (min_value > 160)) {
-            step1 = 0.5;
-            step2 = 0.01;
-            step3 = 0.1;
-
-            temp = min_value + 301;
-            reset[0] = a1;
-            reset[1] = b1;
-            reset[2] = c1;
-            reset[3] = a2;
-            reset[4] = b2;
-            reset[5] = c2;
-            while (temp - min_value > 300) {
-                a1 = reset[0] + (rand() % 100 - 50) / 1.0;
-                b1 = reset[1] + (rand() % 10 - 5) / 10.0;
-                c1 = reset[2] + (rand() % 10 - 5) / 1.0;
-                a2 = reset[3] + (rand() % 100 - 50) / 1.0;
-                b2 = reset[4] + (rand() % 10 - 5) / 10.0;
-                c2 = reset[5] + (rand() % 10 - 5) / 1.0;
-
-                temp = 0;
-                for (int p = 0; p < numbers_of_points; ++p) {
+        temp = 0;
+        if (!need_center_correction) {
+            for (int p = 0; p < numbers_of_points; ++p) {
+                center_correcter = 0;
+                if ((p > n * 0.25) && (p < n * 0.75)) {
                     center_correcter = 1;
-                    if ((p > n * 0.25) && (p < n * 0.75)) {
-                        if (need_center_correction) {
-                            center_correcter = 8;
-                        }
-                    }
-                    if (f[start + p * n / numbers_of_points] + coefficient < 128) {
-                        temp += center_correcter * std::abs(f[start + p * (n / numbers_of_points)] - std::abs(a1) * exp(-std::abs(b1) * pow(x[start + p * (n / numbers_of_points)] - c1, 2)) - std::abs(a2) * exp(-std::abs(b2) * pow(x[start + p * (n / numbers_of_points)] - c2, 2)));
-                    }
+                }
+                if (f[start + p * n / numbers_of_points] + coefficient < 128) {
+                    temp += center_correcter * std::abs(f[start + p * (n / numbers_of_points)] - std::abs(a1) * exp(-std::abs(b1) * pow(x[start + p * (n / numbers_of_points)] - c1, 2)) - std::abs(a2) * exp(-std::abs(b2) * pow(x[start + p * (n / numbers_of_points)] - c2, 2)));
                 }
             }
-
-            min_value = temp;
-            counter = 0;
-        }
-    }
-    temp = 0;
-    if (!need_center_correction) {
-        for (int p = 0; p < numbers_of_points; ++p) {
-            center_correcter = 0;
-            if ((p > n * 0.25) && (p < n * 0.75)) {
-                center_correcter = 1;
-            }
-            if (f[start + p * n / numbers_of_points] + coefficient < 128) {
-                temp += center_correcter * std::abs(f[start + p * (n / numbers_of_points)] - std::abs(a1) * exp(-std::abs(b1) * pow(x[start + p * (n / numbers_of_points)] - c1, 2)) - std::abs(a2) * exp(-std::abs(b2) * pow(x[start + p * (n / numbers_of_points)] - c2, 2)));
+            if ((min_value < 80) && (temp > 50)) {
+                need_center_correction = true;
+                min_value = INFINITY;
             }
         }
-        if ((min_value < 80) && (temp > 50)) {
-            need_center_correction = true;
-            min_value = INFINITY;
-        }
-    }
-    out << "a1 = " << a1 << ", b1 = " << b1 << ", c1 = " << c1 << '\n' << flush;
-    out << "a2 = " << a2 << ", b2 = " << b2 << ", c2 = " << c2 << '\n' << flush;
-    out << min_value << ' ' << previous_value << '\n' << flush;
+        out << "a1 = " << a1 << ", b1 = " << b1 << ", c1 = " << c1 << '\n' << flush;
+        out << "a2 = " << a2 << ", b2 = " << b2 << ", c2 = " << c2 << '\n' << flush;
+        out << min_value << ' ' << previous_value << '\n' << flush;
 
-    for (uint8_t i = 0; i < 6; ++i) {
-        out << (int)min_point_indexes[i] << ' ' << flush;
-    }
-    out << '\n' << step1 << ' ' << step2 << ' ' << step3 << '\n' << flush;
-    out << "\n\n" << flush;
+        for (uint8_t i = 0; i < 6; ++i) {
+            out << (int)min_point_indexes[i] << ' ' << flush;
+        }
+        out << '\n' << step1 << ' ' << step2 << ' ' << step3 << '\n' << flush;
+        out << "\n\n" << flush;
     }
 
     a1 = std::abs(a1);
@@ -758,7 +780,7 @@ void MainWindow::on_results_clicked()
     QMessageBox msgBox(this);
     msgBox.setWindowTitle(QString::fromUtf8("Результаты"));
     msgBox.setText(QString::fromUtf8("Результаты вычислений:\n") +
-            QString::fromUtf8("Экспоненты:\na1 = ") + QString::number(coefficients[0]) +
+                   QString::fromUtf8("Коэффициенты при экспонентах:\na1 = ") + QString::number(coefficients[0]) +
             QString::fromUtf8(", b1 = ") + QString::number(coefficients[1]) +
             QString::fromUtf8(", c1 = ") + QString::number(coefficients[2]) +
             QString::fromUtf8("\na2 = ") + QString::number(coefficients[3]) +
