@@ -14545,6 +14545,25 @@ void QCPGraph::setData(const QVector<double> &key, const QVector<double> &value)
   }
 }
 
+/*! \overload
+
+  Replaces the current data with the provided points from Function in \a key and \a value pairs. The
+  provided vectors should have equal length. Else, the number of added points will be the size of the
+  smallest vector.
+*/
+void QCPGraph::setData(const Function &function)
+{
+  mData->clear();
+  int n = function.size();
+  QCPData newData;
+  for (unsigned int i=0; i<n; ++i)
+  {
+    newData.key = function.getKey(i);
+    newData.value = function.getValue(i);
+    mData->insertMulti(newData.key, newData);
+  }
+}
+
 /*!
   Replaces the current data with the provided points in \a key and \a value pairs. Additionally the
   symmetrical value error of the data points are set to the values in \a valueError.
@@ -14888,6 +14907,22 @@ void QCPGraph::addData(double key, double value)
 }
 
 /*! \overload
+  Adds the provided single data point from FunctionElement as \a x and \a f pair to the current data.
+
+  Alternatively, you can also access and modify the graph's data via the \ref data method, which
+  returns a pointer to the internal \ref QCPDataMap.
+
+  \see removeData
+*/
+void QCPGraph::addData(const FunctionElement &element)
+{
+  QCPData newData;
+  newData.key = element.x;
+  newData.value = element.f;
+  mData->insertMulti(newData.key, newData);
+}
+
+/*! \overload
   Adds the provided data points as \a key and \a value pairs to the current data.
   
   Alternatively, you can also access and modify the graph's data via the \ref data method, which
@@ -14903,6 +14938,26 @@ void QCPGraph::addData(const QVector<double> &keys, const QVector<double> &value
   {
     newData.key = keys[i];
     newData.value = values[i];
+    mData->insertMulti(newData.key, newData);
+  }
+}
+
+/*! \overload
+  Adds the provided data points from Function as \a key and \a value pairs to the current data.
+
+  Alternatively, you can also access and modify the graph's data via the \ref data method, which
+  returns a pointer to the internal \ref QCPDataMap.
+
+  \see removeData
+*/
+void QCPGraph::addData(const Function &function)
+{
+  int n = function.size();
+  QCPData newData;
+  for (int i=0; i<n; ++i)
+  {
+    newData.key = function.getKey(i);
+    newData.value = function.getValue(i);
     mData->insertMulti(newData.key, newData);
   }
 }
@@ -16885,6 +16940,25 @@ void QCPCurve::setData(const QVector<double> &key, const QVector<double> &value)
   }
 }
 
+/*! \overload
+
+  Replaces the current data with the provided from Function \a x and \a f pairs. The t parameter
+  of each data point will be set to the integer index of the respective key/value pair.
+*/
+void QCPCurve::setData(const Function &function)
+{
+  mData->clear();
+  unsigned int n = function.size();
+  QCPCurveData newData;
+  for (unsigned int i=0; i<n; ++i)
+  {
+    newData.t = i; // no t vector given, so we assign t the index of the key/value pair
+    newData.key = function.getKey(i);
+    newData.value = function.getValue(i);
+    mData->insertMulti(newData.t, newData);
+  }
+}
+
 /*!
   Sets the visual appearance of single data points in the plot. If set to \ref
   QCPScatterStyle::ssNone, no scatter points are drawn (e.g. for line-only plots with appropriate
@@ -16958,6 +17032,41 @@ void QCPCurve::addData(double key, double value)
   newData.key = key;
   newData.value = value;
   mData->insertMulti(newData.t, newData);
+}
+
+/*! \overload
+
+  Adds the provided single data point from FunctionElement as \a x and \a f pair to the current data The t
+  parameter of the data point is set to the t of the last data point plus 1. If there is no last
+  data point, t will be set to 0.
+
+  \see removeData
+*/
+void QCPCurve::addData(const FunctionElement &element)
+{
+  QCPCurveData newData;
+  if (!mData->isEmpty())
+    newData.t = (mData->constEnd()-1).key()+1;
+  else
+    newData.t = 0;
+  newData.key = element.x;
+  newData.value = element.f;
+  mData->insertMulti(newData.t, newData);
+}
+
+/*! \overload
+
+  Adds the provided data from Function to the current data The t
+  parameter of the data point is set to the t of the last data point plus 1. If there is no last
+  data point, t will be set to 0.
+
+  \see removeData
+*/
+void QCPCurve::addData(const Function &function)
+{
+  for (unsigned int i = 0; i < function.size(); i++) {
+      addData(function.getElement(i));
+  }
 }
 
 /*! \overload

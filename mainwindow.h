@@ -6,6 +6,11 @@
 
 #include <qcustomplot.h>
 
+#include "function.h"
+#include "functionapproximation.h"
+#include "FunctionExtraction/abstractfunctionextraction.h"
+#include "FunctionApproximator/abstractfunctionapproximator.h"
+
 namespace Ui {
 class MainWindow;
 }
@@ -19,10 +24,6 @@ public:
     ~MainWindow();
 
 private slots:
-    void on_open_file_clicked();
-
-    void on_experiment_choose_valueChanged(int arg1);
-
     void on_make_plot_clicked();
 
     void mouseMoveEvent(QMouseEvent *event);
@@ -41,14 +42,18 @@ private slots:
 
     void on_results_clicked();
 
+    void on_extractor_choose_currentIndexChanged(int index);
+
 private:
     Ui::MainWindow *ui;
-    QFile file;
     QCPCurve *verticalLine, *start, *end;
     bool end_turn;
-    double start_v, end_v, min_y, max_y, xAxis[2], yAxis[2], coefficients[6];
-    QVector<double> x;
-    QVector<quint8> f;
+    double min_y, max_y, xAxis[2], yAxis[2];
+    unsigned int start_index, end_index;
+    Function function;
+    FunctionApproximation approximation;
+    AbstractFunctionExtraction *extractor;
+    AbstractFunctionApproximator *approximator;
 };
 
 #endif // MAINWINDOW_H

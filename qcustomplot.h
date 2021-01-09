@@ -54,6 +54,8 @@
 #  include <QtPrintSupport>
 #endif
 
+#include "function.h"
+
 class QCPPainter;
 class QCustomPlot;
 class QCPLayerable;
@@ -2542,6 +2544,7 @@ public:
   // setters:
   void setData(QCPDataMap *data, bool copy=false);
   void setData(const QVector<double> &key, const QVector<double> &value);
+  void setData(const Function &function);
   void setDataKeyError(const QVector<double> &key, const QVector<double> &value, const QVector<double> &keyError);
   void setDataKeyError(const QVector<double> &key, const QVector<double> &value, const QVector<double> &keyErrorMinus, const QVector<double> &keyErrorPlus);
   void setDataValueError(const QVector<double> &key, const QVector<double> &value, const QVector<double> &valueError);
@@ -2561,7 +2564,9 @@ public:
   void addData(const QCPDataMap &dataMap);
   void addData(const QCPData &data);
   void addData(double key, double value);
+  void addData(const FunctionElement &element);
   void addData(const QVector<double> &keys, const QVector<double> &values);
+  void addData(const Function &function);
   void removeDataBefore(double key);
   void removeDataAfter(double key);
   void removeData(double fromKey, double toKey);
@@ -2685,6 +2690,7 @@ public:
   void setData(QCPCurveDataMap *data, bool copy=false);
   void setData(const QVector<double> &t, const QVector<double> &key, const QVector<double> &value);
   void setData(const QVector<double> &key, const QVector<double> &value);
+  void setData(const Function &function);
   void setScatterStyle(const QCPScatterStyle &style);
   void setLineStyle(LineStyle style);
   
@@ -2693,6 +2699,8 @@ public:
   void addData(const QCPCurveData &data);
   void addData(double t, double key, double value);
   void addData(double key, double value);
+  void addData(const FunctionElement &element);
+  void addData(const Function &function);
   void addData(const QVector<double> &ts, const QVector<double> &keys, const QVector<double> &values);
   void removeDataBefore(double t);
   void removeDataAfter(double t);
