@@ -14,7 +14,7 @@ void Function::add(double x, double f) {
 }
 
 FunctionElement Function::getElement(unsigned int i) const {
-    if (i < elements.size()) {
+    if (i < (unsigned int)elements.size()) {
         return elements[i];
     }
     QTextStream(stderr) << "Index is out of array!\n" << Qt::flush;
@@ -26,7 +26,7 @@ FunctionElement Function::getElement(int i) const {
 }
 
 double Function::getKey(unsigned int i) const {
-    if (i < elements.size()) {
+    if (i < (unsigned int)elements.size()) {
         return elements[i].x;
     }
     QTextStream(stderr) << "Index is out of array!\n" << Qt::flush;
@@ -38,7 +38,7 @@ double Function::getKey(int i) const {
 }
 
 double Function::getValue(unsigned int i) const {
-    if (i < elements.size()) {
+    if (i < (unsigned int)elements.size()) {
         return elements[i].f;
     }
     QTextStream(stderr) << "Index is out of array!\n" << Qt::flush;
@@ -57,6 +57,15 @@ double Function::getValue(double x) const {
     }
     QTextStream(stdout) << "The element hasn't been found!\n" << Qt::flush;
     return double();
+}
+
+double Function::getStep() const {
+    double result = 0;
+    for (int i = 1; i < elements.size(); i++) {
+        result += elements[i].x - elements[i - 1].x;
+    }
+    result /= elements.size() - 1;
+    return result;
 }
 
 unsigned int Function::size() const {

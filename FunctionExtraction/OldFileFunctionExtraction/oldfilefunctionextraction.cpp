@@ -28,18 +28,18 @@ Function OldFileFunctionExtraction::extract() {
     }
     OldFileFunctionExtractionDialog dialogWindow(&file, parent);
     dialogWindow.ChangeExperimentsCount(experiments_count);
-    if (dialogWindow.exec() == QMessageBox::Ok) {
-        Function result;
-        const double step = 3.857;
-
-        file.seek(1 + (dialogWindow.GetExperimentNumber() - 1) * 768 + (dialogWindow.GetChannelNumber() - 1) * 256);
-
-        char temp;
-        for (quint32 i = 0; i < 256; i++) {
-            file.read(&temp, 1);
-            result.add({i * step, (double)(unsigned char)temp});
-        }
-        return result;
+    if (dialogWindow.exec() != QMessageBox::Ok) {
+		return Function();
     }
-    return Function();
+	Function result;
+	const double step = 3.857;
+
+	file.seek(1 + (dialogWindow.GetExperimentNumber() - 1) * 768 + (dialogWindow.GetChannelNumber() - 1) * 256);
+
+	char temp;
+	for (quint32 i = 0; i < 256; i++) {
+		file.read(&temp, 1);
+		result.add({i * step, (double)(unsigned char)temp});
+	}
+	return result;
 }

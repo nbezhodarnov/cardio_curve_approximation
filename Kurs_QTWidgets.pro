@@ -24,10 +24,12 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 CONFIG     += debug
 
+GUITEST = yes
 
 SOURCES += \
     FunctionApproximator/NetFunctionApproximator/netfunctionapproximator.cpp \
     FunctionApproximator/abstractfunctionapproximator.cpp \
+    FunctionExtraction/NdatFileFunctionExtraction/ndatfilefunctionextraction.cpp \
     FunctionExtraction/OldFileFunctionExtraction/oldfilefunctionextraction.cpp \
     FunctionExtraction/OldFileFunctionExtraction/oldfilefunctionextractiondialog.cpp \
     FunctionExtraction/abstractfunctionextraction.cpp \
@@ -42,6 +44,8 @@ SOURCES += \
 HEADERS += \
     FunctionApproximator/NetFunctionApproximator/netfunctionapproximator.h \
     FunctionApproximator/abstractfunctionapproximator.h \
+    FunctionExtraction/DAQDeviceFunctionExtraction/tests/Windows/GUI/testwindowsgui.h \
+    FunctionExtraction/NdatFileFunctionExtraction/ndatfilefunctionextraction.h \
     FunctionExtraction/OldFileFunctionExtraction/oldfilefunctionextraction.h \
     FunctionExtraction/OldFileFunctionExtraction/oldfilefunctionextractiondialog.h \
     FunctionExtraction/abstractfunctionextraction.h \
@@ -55,3 +59,53 @@ HEADERS += \
 FORMS += \
         FunctionExtraction/OldFileFunctionExtraction/oldfilefunctionextractiondialog.ui \
         mainwindow.ui
+
+win32 {
+SOURCES += \
+    FunctionExtraction/DAQDeviceFunctionExtraction/daqdevicefunctionextraction.cpp \
+    FunctionExtraction/DAQDeviceFunctionExtraction/daqdevicefunctionextractionwizard.cpp \
+    FunctionExtraction/DAQDeviceFunctionExtraction/daqdevicefunctionextractionresources.cpp \
+    FunctionExtraction/DAQDeviceFunctionExtraction/daqdevicefunctionextractionwizardpage1choosedevice.cpp \
+    FunctionExtraction/DAQDeviceFunctionExtraction/daqdevicefunctionextractionwizardpage2setparameters.cpp \
+    FunctionExtraction/DAQDeviceFunctionExtraction/daqdevicefunctionextractionwizardpage3getdata.cpp \
+    FunctionExtraction/DAQDeviceFunctionExtraction/daqdevicefunctionextractionwizardpage4writetofile.cpp \
+    FunctionExtraction/DAQDeviceFunctionExtraction/daqdevicefunctionextractionwizardpage5finish.cpp
+
+HEADERS += \
+    FunctionExtraction/DAQDeviceFunctionExtraction/daqdevicefunctionextraction.h \
+    FunctionExtraction/DAQDeviceFunctionExtraction/daqdevicefunctionextractionwizard.h \
+    FunctionExtraction/DAQDeviceFunctionExtraction/daqdevicefunctionextractionresources.h \
+    FunctionExtraction/DAQDeviceFunctionExtraction/daqdevicefunctionextractionwizardpage1choosedevice.h \
+    FunctionExtraction/DAQDeviceFunctionExtraction/daqdevicefunctionextractionwizardpage2setparameters.h \
+    FunctionExtraction/DAQDeviceFunctionExtraction/daqdevicefunctionextractionwizardpage3getdata.h \
+    FunctionExtraction/DAQDeviceFunctionExtraction/daqdevicefunctionextractionwizardpage4writetofile.h \
+    FunctionExtraction/DAQDeviceFunctionExtraction/daqdevicefunctionextractionwizardpage5finish.h \
+    FunctionExtraction/DAQDeviceFunctionExtraction/oldsp32.h \
+    FunctionExtraction/DAQDeviceFunctionExtraction/olerrors.h \
+    FunctionExtraction/DAQDeviceFunctionExtraction/olmem.h \
+    FunctionExtraction/DAQDeviceFunctionExtraction/oltypes.h \
+    FunctionExtraction/DAQDeviceFunctionExtraction/oldaapi.h \
+    FunctionExtraction/DAQDeviceFunctionExtraction/oldadefs.h \
+    FunctionExtraction/DAQDeviceFunctionExtraction/tedsapi.h
+
+FORMS += \
+    FunctionExtraction/DAQDeviceFunctionExtraction/daqdevicefunctionextractionwizard.ui \
+    FunctionExtraction/DAQDeviceFunctionExtraction/daqdevicefunctionextractionwizardpage1choosedevice.ui \
+    FunctionExtraction/DAQDeviceFunctionExtraction/daqdevicefunctionextractionwizardpage2setparameters.ui \
+    FunctionExtraction/DAQDeviceFunctionExtraction/daqdevicefunctionextractionwizardpage3getdata.ui \
+    FunctionExtraction/DAQDeviceFunctionExtraction/daqdevicefunctionextractionwizardpage4writetofile.ui \
+    FunctionExtraction/DAQDeviceFunctionExtraction/daqdevicefunctionextractionwizardpage5finish.ui
+
+    defined(GUITEST, var) {
+        SOURCES += FunctionExtraction/DAQDeviceFunctionExtraction/tests/Windows/GUI/testwindowsgui.cpp
+    } else {
+        LIBS += -L$$PWD/FunctionExtraction/DAQDeviceFunctionExtraction/libs/
+        contains(QT_ARCH, i386) {
+            LIBS += -loldaapi32 -loldsp32 -lolmem32 -lolmemsup
+        } else {
+            LIBS += -loldaapi64 -lolmem64
+        }
+    }
+}
+
+DISTFILES +=

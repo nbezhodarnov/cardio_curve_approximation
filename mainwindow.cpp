@@ -7,6 +7,9 @@
 
 #include "FunctionExtraction/filefunctionextractionmanager.h"
 #include "FunctionApproximator/NetFunctionApproximator/netfunctionapproximator.h"
+#ifdef _WIN32
+#include "FunctionExtraction/DAQDeviceFunctionExtraction/daqdevicefunctionextraction.h"
+#endif
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -24,12 +27,19 @@ MainWindow::MainWindow(QWidget *parent) :
     end_turn = false;
     verticalLine = nullptr;
 
-    extractor = new FileFunctionExtractionManager(this);
+    /*
+    ui->extractor_choose->lineEdit()->setAlignment(Qt::AlignCenter);
     for (int i = 0; i < ui->extractor_choose->count(); i++) {
         ui->extractor_choose->setItemData(i, Qt::AlignCenter, Qt::TextAlignmentRole);
     }
+    ui->extractor_choose->lineEdit()->setReadOnly(true);
+    */
 
+    extractor = new FileFunctionExtractionManager(this);
     approximator = new NetFunctionApproximator(this);
+#ifndef _WIN32
+    ui->extractor_choose->removeItem(1);
+#endif
 }
 
 void MainWindow::mouseMoveEvent(QMouseEvent *event)
@@ -148,7 +158,7 @@ void MainWindow::mouseClickEvent(QMouseEvent *event)
     ui->approximation_start->setEnabled((start->visible()) && (end->visible()));
 }
 
-void MainWindow::on_plotrender_xaxis_range_changed(const QCPRange &newRange)
+void MainWindow::plotrender_xaxis_range_changed(const QCPRange &newRange)
 {
     if (verticalLine == nullptr) {
         return;
@@ -163,7 +173,7 @@ void MainWindow::on_plotrender_xaxis_range_changed(const QCPRange &newRange)
     ui->widget->xAxis->setRange(lower, upper);
 }
 
-void MainWindow::on_plotrender_yaxis_range_changed(const QCPRange &newRange)
+void MainWindow::plotrender_yaxis_range_changed(const QCPRange &newRange)
 {
     if (verticalLine == nullptr) {
         return;
@@ -196,10 +206,11 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_make_plot_clicked()
 {
-    function = extractor->extract();
-    if (function == Function()) {
+    Function temp = extractor->extract();
+    if (temp == Function()) {
         return;
     }
+    function = temp;
     max_y = function.getValue(0);
     min_y = function.getValue(0);
     for (unsigned int i = 1; i < function.size(); i++) {
@@ -233,8 +244,8 @@ void MainWindow::on_make_plot_clicked()
         connect(ui->widget, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(mouseMoveEvent(QMouseEvent*)));
         connect(ui->widget, SIGNAL(mousePress(QMouseEvent*)), this, SLOT(mousePressEvent(QMouseEvent*)));
         connect(ui->widget, SIGNAL(mouseRelease(QMouseEvent*)), this, SLOT(mouseReleaseEvent(QMouseEvent*)));
-        connect(ui->widget->xAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(on_plotrender_xaxis_range_changed(QCPRange)));
-        connect(ui->widget->yAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(on_plotrender_yaxis_range_changed(QCPRange)));
+        connect(ui->widget->xAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(plotrender_xaxis_range_changed(const QCPRange &)));
+        connect(ui->widget->yAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(plotrender_yaxis_range_changed(const QCPRange &)));
     } else {
         bool has_been_cleaned = false;
         if (start != nullptr) {
@@ -370,11 +381,19 @@ void MainWindow::on_extractor_choose_currentIndexChanged(int index)
 {
     delete extractor;
     switch (index) {
-    case 0:
+    case 0: {
         extractor = new FileFunctionExtractionManager(this);
         break;
-    default:
+    }
+#ifdef _WIN32
+    case 1: {
+        extractor = new DAQDeviceFunctionExtraction(this);
+        break;
+    }
+#endif
+    default: {
         extractor = new FileFunctionExtractionManager(this);
         break;
+    }
     }
 }

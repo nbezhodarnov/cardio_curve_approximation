@@ -1,10 +1,12 @@
 #include <QFile>
+#include <QFileInfo>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QTextStream>
 
 #include "filefunctionextractionmanager.h"
 #include "OldFileFunctionExtraction/oldfilefunctionextraction.h"
+#include "NdatFileFunctionExtraction/ndatfilefunctionextraction.h"
 
 qint64 OpenFileError() {
     QMessageBox msgBox;
@@ -26,18 +28,25 @@ FileFunctionExtractionManager::~FileFunctionExtractionManager() {
 Function FileFunctionExtractionManager::extract() {
     Function result;
     if (extractor != nullptr) {
-        result = extractor->extract();
-        if (result == Function()) {
+        QMessageBox msgBox(QMessageBox::Icon(), "Открыть другой файл?", "Желаете открыть другой файл?", QMessageBox::Yes | QMessageBox::No, parent);
+        msgBox.setDefaultButton(QMessageBox::Yes);
+        if (msgBox.exec() != QMessageBox::Yes) {
+            result = extractor->extract();
+            if (result == Function()) {
+                delete extractor;
+                extractor = nullptr;
+            } else {
+                return result;
+            }
+        } else {
             delete extractor;
             extractor = nullptr;
-        } else {
-            return result;
         }
     }
     QFile file;
     qint64 ret = QMessageBox::Yes;
     while (ret == QMessageBox::Yes) {
-        QString file_name = QFileDialog::getOpenFileName(parent, QString::fromUtf8("Открыть файл"), QDir::currentPath(), QString::fromUtf8("Файлы dat (*.dat);;Все файлы (*)"));
+        QString file_name = QFileDialog::getOpenFileName(parent, QString::fromUtf8("Открыть файл"), QDir::currentPath(), QString::fromUtf8("Файлы ndat (*.ndat);;Файлы dat (*.dat);;Все файлы (*)"));
         if (file_name == "") {
             QTextStream(stdout) << "No file has been opened.\n" << Qt::flush;
             return Function();
@@ -48,8 +57,13 @@ Function FileFunctionExtractionManager::extract() {
             continue;
         } else {
             file.close();
-            extractor = new OldFileFunctionExtraction(file_name, parent);
-            result = extractor->extract();
+            if (QFileInfo(file_name).suffix() == "ndat") {
+                extractor = new NdatFileFunctionExtraction(file_name, parent);
+                result = extractor->extract();
+            } else {
+                extractor = new OldFileFunctionExtraction(file_name, parent);
+                result = extractor->extract();
+            }
 
             if (result == Function()) {
                 delete extractor;

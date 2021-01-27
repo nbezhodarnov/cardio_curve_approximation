@@ -18,6 +18,7 @@ public:
     double getValue(unsigned int) const;
     double getValue(int) const;
     double getValue(double) const;
+    double getStep() const;
     unsigned int size() const;
     bool operator==(const Function&) const;
     bool operator!=(const Function&) const;

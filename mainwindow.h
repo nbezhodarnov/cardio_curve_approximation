@@ -36,9 +36,9 @@ private slots:
 
     void on_approximation_start_clicked();
 
-    void on_plotrender_xaxis_range_changed(const QCPRange &);
+    void plotrender_xaxis_range_changed(const QCPRange &);
 
-    void on_plotrender_yaxis_range_changed(const QCPRange &);
+    void plotrender_yaxis_range_changed(const QCPRange &);
 
     void on_results_clicked();
 

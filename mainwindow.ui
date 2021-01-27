@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>664</width>
-    <height>437</height>
+    <width>700</width>
+    <height>450</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -54,9 +54,17 @@
       </item>
       <item>
        <widget class="QComboBox" name="extractor_choose">
+        <property name="editable">
+         <bool>false</bool>
+        </property>
         <item>
          <property name="text">
           <string>Из файла</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Из устройства</string>
          </property>
         </item>
        </widget>
@@ -114,8 +122,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>664</width>
-     <height>23</height>
+     <width>700</width>
+     <height>20</height>
     </rect>
    </property>
   </widget>

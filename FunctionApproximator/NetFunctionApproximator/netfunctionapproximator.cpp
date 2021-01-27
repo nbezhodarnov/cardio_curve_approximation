@@ -5,6 +5,19 @@
 
 #include "netfunctionapproximator.h"
 
+inline LineIndexes::LineIndexes(unsigned int begin_input, unsigned int end_input) {
+    begin = begin_input;
+    end = end_input;
+}
+
+inline bool LineIndexes::isIndexInLine(unsigned int index) {
+    return ((index >= begin) && (index <= end));
+}
+
+inline bool LineIndexes::isIndexOutOfLine(unsigned int index) {
+    return ((index < begin) || (index > end));
+}
+
 NetFunctionApproximator::NetFunctionApproximator(QWidget *ptr): AbstractFunctionApproximator(ptr) {
 }
 
@@ -30,19 +43,23 @@ FunctionApproximation NetFunctionApproximator::approximate(const Function &funct
         funcTemp.add({function.getKey(i), function.getValue(i) - coefficient});
     }
 
-    unsigned int index = n / 10, peak_beginning;
+    unsigned int index = n / 10, peak_beginning = 0;
     bool is_peak_unavailable = false;
-    double a1, a2, b1, b2, c1, c2, step = 3.857;
+    LineIndexes peakLine1, peakLine2;
+    double a1, a2, b1, b2, c1, c2, step = function.getStep(), peak_length = 0;
     while (funcTemp.getValue(index) <= funcTemp.getValue(index + 1)) {
-        if (function.getValue(index) == 128) {
-            if (function.getValue(index - 1) < 128) {
-                peak_beginning = index;
+        if (function.getValue(index) == funcTemp.getValue(index + 1)) {
+            peak_length += function.getKey(index + 1) - function.getKey(index);
+            if (peak_length > 0.01) {
                 is_peak_unavailable = true;
             }
+        } else if (function.getValue(index + 1) == funcTemp.getValue(index + 2)) {
+            peak_beginning = index + 1;
         }
         index++;
-        if ((function.getValue(index + 1) < 128) && (is_peak_unavailable)) {
-            index = (peak_beginning + index) / 2;
+        if ((function.getValue(index + 1) > function.getValue(index + 2)) && (is_peak_unavailable)) {
+            peakLine1 = {peak_beginning, index + 1};
+            index -= (index + 1 - peak_beginning) / 2 - 1;
             break;
         }
     }
@@ -56,16 +73,20 @@ FunctionApproximation NetFunctionApproximator::approximate(const Function &funct
 
     index = int(n * 0.9);
     is_peak_unavailable = false;
+    peak_length = 0;
     while (funcTemp.getValue(index) <= funcTemp.getValue(index - 1)) {
-        if (function.getValue(index) == 128) {
-            if (function.getValue(index) < 128) {
-                peak_beginning = index;
+        if (function.getValue(index) == funcTemp.getValue(index - 1)) {
+            peak_length += function.getKey(index) - function.getKey(index - 1);
+            if (peak_length > 0.01) {
                 is_peak_unavailable = true;
             }
+        } else if (function.getValue(index - 1) == funcTemp.getValue(index - 2)) {
+            peak_beginning = index - 1;
         }
         index--;
-        if ((function.getValue(index - 1) < 128) && (is_peak_unavailable)) {
-            index = (peak_beginning + index) / 2;
+        if ((function.getValue(index - 1) > function.getValue(index - 2)) && (is_peak_unavailable)) {
+            peakLine2 = {index - 1, peak_beginning};
+            index += (peak_beginning - index + 1) / 2 - 1;
             break;
         }
     }
@@ -94,13 +115,13 @@ FunctionApproximation NetFunctionApproximator::approximate(const Function &funct
         a2 += coefficient / 2;
     }
 
-    bool is_two_extremums = true;
+    bool are_two_extremums = true;
     if (std::abs(c1 - c2) <= step) {
         unsigned int index_temp = n;
         while (funcTemp.getValue(index_temp - 1) < funcTemp.getValue(index_temp)) {
             index_temp--;
         }
-        while ((funcTemp.getValue(index_temp) <= funcTemp.getValue(index_temp - 1)) && (index_temp > int(n * 0.9))) {
+        while ((funcTemp.getValue(index_temp) <= funcTemp.getValue(index_temp - 1)) && (index_temp > (unsigned int)(n * 0.9))) {
             index_temp--;
         }
         if (index_temp <= n * 0.9) {
@@ -111,8 +132,8 @@ FunctionApproximation NetFunctionApproximator::approximate(const Function &funct
             while ((funcTemp.getValue(index_temp) <= funcTemp.getValue(index_temp + 1)) && (index_temp < n / 10)) {
                 index_temp++;
             }
-            if (index_temp >= 100) {
-                is_two_extremums = false;
+            if (index_temp >= n / 10) {
+                are_two_extremums = false;
             } else {
                 c1 = funcTemp.getKey(index_temp);
                 a1 = funcTemp.getValue(index_temp);
@@ -127,7 +148,7 @@ FunctionApproximation NetFunctionApproximator::approximate(const Function &funct
 
 
     out << "a1 = " << a1 << ", b1 = " << b1 << ", c1 = " << c1 << '\n' << Qt::flush;
-    if (is_two_extremums) {
+    if (are_two_extremums) {
         out << "a2 = " << a2 << ", b2 = " << b2 << ", c2 = " << c2 << "\n\n" << Qt::flush;
     } else {
         a1 /= 2;
@@ -156,12 +177,12 @@ FunctionApproximation NetFunctionApproximator::approximate(const Function &funct
     } else {
         step2 = 0.01;
     }
-    if (!is_two_extremums) {
+    if (!are_two_extremums) {
         step1 *= 2;
         step2 *= 2;
         step3 *= 2;
     }
-    int numbers_of_points = n, counter = 0;
+    unsigned int numbers_of_points = n, counter = 0;
     if (n < numbers_of_points) {
         numbers_of_points = n;
     }
@@ -189,7 +210,7 @@ FunctionApproximation NetFunctionApproximator::approximate(const Function &funct
                             for (uint8_t r = 0; r < 5; ++r) {
                                 QApplication::processEvents();
                                 temp = 0;
-                                for (int p = 0; p < numbers_of_points; ++p) {
+                                for (unsigned int p = 0; p < numbers_of_points; ++p) {
                                     center_correcter = 1;
                                     if ((p > n * 0.25) && (p < n * 0.75)) {
                                         if (need_center_correction) {
@@ -197,7 +218,7 @@ FunctionApproximation NetFunctionApproximator::approximate(const Function &funct
                                         }
                                     }
                                     long double approximating_function = - std::abs(a1 - (2 - i) * step1) * exp(-std::abs(b1 - (2 - j) * step2) * pow(funcTemp.getKey(p * n / numbers_of_points) - c1 + (2 - k) * step3, 2)) - std::abs(a2 - (2 - l) * step1) * exp(-std::abs(b2 - (2 - m) * step2) * pow(funcTemp.getKey(p * n / numbers_of_points) - c2 + (2 - r) * step3, 2));
-                                    if ((function.getValue(p * n / numbers_of_points) < 128) || (function.getValue(p * n / numbers_of_points) + approximating_function > 0)) {
+                                    if (((peakLine1.isIndexOutOfLine(p * n / numbers_of_points)) && (peakLine2.isIndexOutOfLine(p * n / numbers_of_points))) || (function.getValue(p * n / numbers_of_points) + approximating_function > 0)) {
                                         temp += center_correcter * std::abs(funcTemp.getValue(p * n / numbers_of_points) + approximating_function);
                                     }
                                 }
@@ -243,14 +264,14 @@ FunctionApproximation NetFunctionApproximator::approximate(const Function &funct
                         c2 = reset[5] + (rand() % 10 - 5) / 1.0;
 
                         temp = 0;
-                        for (int p = 0; p < numbers_of_points; ++p) {
+                        for (unsigned int p = 0; p < numbers_of_points; ++p) {
                             center_correcter = 1;
                             if ((p > n * 0.25) && (p < n * 0.75)) {
                                 if (need_center_correction) {
                                     center_correcter = 8;
                                 }
                             }
-                            if (function.getValue(p * n / numbers_of_points) < 128) {
+                            if ((peakLine1.isIndexOutOfLine(p * n / numbers_of_points)) && (peakLine2.isIndexOutOfLine(p * n / numbers_of_points))) {
                                 temp += center_correcter * std::abs(funcTemp.getValue(p * n / numbers_of_points) - std::abs(a1) * exp(-std::abs(b1) * pow(funcTemp.getKey(p * n / numbers_of_points) - c1, 2)) - std::abs(a2) * exp(-std::abs(b2) * pow(funcTemp.getKey(p * n / numbers_of_points) - c2, 2)));
                             }
                         }
@@ -310,14 +331,14 @@ FunctionApproximation NetFunctionApproximator::approximate(const Function &funct
                     c2 = reset[5] + (rand() % 10 - 5) / 1.0;
 
                     temp = 0;
-                    for (int p = 0; p < numbers_of_points; ++p) {
+                    for (unsigned int p = 0; p < numbers_of_points; ++p) {
                         center_correcter = 1;
                         if ((p > n * 0.25) && (p < n * 0.75)) {
                             if (need_center_correction) {
                                 center_correcter = 8;
                             }
                         }
-                        if (function.getValue(p * n / numbers_of_points) < 128) {
+                        if ((peakLine1.isIndexOutOfLine(p * n / numbers_of_points)) && (peakLine2.isIndexOutOfLine(p * n / numbers_of_points))) {
                             temp += center_correcter * std::abs(funcTemp.getValue(p * n / numbers_of_points) - std::abs(a1) * exp(-std::abs(b1) * pow(funcTemp.getKey(p * n / numbers_of_points) - c1, 2)) - std::abs(a2) * exp(-std::abs(b2) * pow(funcTemp.getKey(p * n / numbers_of_points) - c2, 2)));
                         }
                     }
@@ -329,12 +350,12 @@ FunctionApproximation NetFunctionApproximator::approximate(const Function &funct
         }
         temp = 0;
         if (!need_center_correction) {
-            for (int p = 0; p < numbers_of_points; ++p) {
+            for (unsigned int p = 0; p < numbers_of_points; ++p) {
                 center_correcter = 0;
                 if ((p > n * 0.25) && (p < n * 0.75)) {
                     center_correcter = 1;
                 }
-                if (function.getValue(p * n / numbers_of_points) < 128) {
+                if ((peakLine1.isIndexOutOfLine(p * n / numbers_of_points)) && (peakLine2.isIndexOutOfLine(p * n / numbers_of_points))) {
                     temp += center_correcter * std::abs(funcTemp.getValue(p * n / numbers_of_points) - std::abs(a1) * exp(-std::abs(b1) * pow(funcTemp.getKey(p * n / numbers_of_points) - c1, 2)) - std::abs(a2) * exp(-std::abs(b2) * pow(funcTemp.getKey(p * n / numbers_of_points) - c2, 2)));
                 }
             }

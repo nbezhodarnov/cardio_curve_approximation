@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>DAQDeviceFunctionExtractionWizard</class>
+ <widget class="QWizard" name="DAQDeviceFunctionExtractionWizard">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>600</width>
+    <height>450</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Чтение данных с устройства</string>
+  </property>
+  <property name="locale">
+   <locale language="Russian" country="Russia"/>
+  </property>
+  <property name="wizardStyle">
+   <enum>QWizard::ClassicStyle</enum>
+  </property>
+  <widget class="DAQDeviceFunctionExtractionWizardPage1ChooseDevice" name="wizardPage1ChooseDevice"/>
+  <widget class="DAQDeviceFunctionExtractionWizardPage2SetParameters" name="wizardPage2SetParameters"/>
+  <widget class="DAQDeviceFunctionExtractionWizardPage3GetData" name="wizardPage3GetData"/>
+  <widget class="DAQDeviceFunctionExtractionWizardPage4WriteToFile" name="wizardPage4WriteToFile"/>
+  <widget class="DAQDeviceFunctionExtractionWizardPage5Finish" name="wizardPage5Finish"/>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>DAQDeviceFunctionExtractionWizardPage1ChooseDevice</class>
+   <extends>QWizardPage</extends>
+   <header>FunctionExtraction/DAQDeviceFunctionExtraction/daqdevicefunctionextractionwizardpage1choosedevice.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>DAQDeviceFunctionExtractionWizardPage2SetParameters</class>
+   <extends>QWizardPage</extends>
+   <header>FunctionExtraction/DAQDeviceFunctionExtraction/daqdevicefunctionextractionwizardpage2setparameters.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>DAQDeviceFunctionExtractionWizardPage3GetData</class>
+   <extends>QWizardPage</extends>
+   <header>FunctionExtraction/DAQDeviceFunctionExtraction/daqdevicefunctionextractionwizardpage3getdata.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>DAQDeviceFunctionExtractionWizardPage4WriteToFile</class>
+   <extends>QWizardPage</extends>
+   <header>FunctionExtraction/DAQDeviceFunctionExtraction/daqdevicefunctionextractionwizardpage4writetofile.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>DAQDeviceFunctionExtractionWizardPage5Finish</class>
+   <extends>QWizardPage</extends>
+   <header>FunctionExtraction/DAQDeviceFunctionExtraction/daqdevicefunctionextractionwizardpage5finish.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>
