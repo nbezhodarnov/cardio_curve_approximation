@@ -199,7 +199,7 @@ FunctionApproximation NetFunctionApproximator::approximate(const Function &funct
     uint8_t center_correcter = 1;
     int little_changes_count = 0;
     long double reset[6];
-    while (min_value > 18) {
+    while (min_value > 5 * step) {
         q = false;
         previous_value = min_value;
         for (uint8_t i = 0; i < 5; ++i) {
@@ -247,7 +247,7 @@ FunctionApproximation NetFunctionApproximator::approximate(const Function &funct
                 step2 = 0.01;
                 step3 = 0.1;
 
-                if (((min_value > 160) && (!long_line)) || ((long_line) && (min_value > 200))) {
+                if (((min_value > 42 * step) && (!long_line)) || ((long_line) && (min_value > 52 * step))) {
                     temp = min_value + 301;
                     reset[0] = a1;
                     reset[1] = b1;
@@ -289,7 +289,7 @@ FunctionApproximation NetFunctionApproximator::approximate(const Function &funct
         a2 -= (2 - min_point_indexes[3]) * step1;
         b2 -= (2 - min_point_indexes[4]) * step2;
         c2 -= (2 - min_point_indexes[5]) * step3;
-        if ((std::abs(previous_value - min_value) < 0.0001) && (((min_value < 160) && (!long_line)) || ((long_line) && (min_value < 200)))) {
+        if ((std::abs(previous_value - min_value) < 0.0001) && (((min_value < 42 * step) && (!long_line)) || ((long_line) && (min_value < 52 * step)))) {
             little_changes_count++;
             if (little_changes_count >= 10) {
                 break;
@@ -310,7 +310,7 @@ FunctionApproximation NetFunctionApproximator::approximate(const Function &funct
                 step3 = 0.1 * (counter / 10);
                 //counter = 0;
             }
-            if ((counter % 100 == 0) && (min_value > 160)) {
+            if ((counter % 100 == 0) && (min_value > 42 * step)) {
                 step1 = 0.5;
                 step2 = 0.01;
                 step3 = 0.1;
@@ -359,7 +359,7 @@ FunctionApproximation NetFunctionApproximator::approximate(const Function &funct
                     temp += center_correcter * std::abs(funcTemp.getValue(p * n / numbers_of_points) - std::abs(a1) * exp(-std::abs(b1) * pow(funcTemp.getKey(p * n / numbers_of_points) - c1, 2)) - std::abs(a2) * exp(-std::abs(b2) * pow(funcTemp.getKey(p * n / numbers_of_points) - c2, 2)));
                 }
             }
-            if ((min_value < 80) && (temp > 50)) {
+            if ((min_value < 21 * step) && (temp > 13 * step)) {
                 need_center_correction = true;
                 min_value = INFINITY;
             }

@@ -8,7 +8,7 @@ DAQDeviceFunctionExtraction::DAQDeviceFunctionExtraction(QWidget *ptr): Abstract
 
 QStringList DAQDeviceFunctionExtraction::getBoardsList() {
     QStringList boards;
-    if (olDaEnumBoards(AddBoardList, (long)&boards) != OLNOERROR) {
+    if (olDaEnumBoards(AddBoardList, (LPARAM)&boards) != OLNOERROR) {
         DisplayErrorMessage("Ошибка при чтении информации об устройствах!");
         return QStringList();
     }
@@ -65,7 +65,7 @@ unsigned int DAQDeviceFunctionExtraction::getChannelsCount() {
 
 QStringList DAQDeviceFunctionExtraction::getGainsList() {
     QStringList gains;
-    if (olDaEnumSSCaps(board.hdass, OL_ENUM_GAINS, AddGainList, (long)&gains) != OLNOERROR) {
+    if (olDaEnumSSCaps(board.hdass, OL_ENUM_GAINS, AddGainList, (LPARAM)&gains) != OLNOERROR) {
         return QStringList();
     }
     return gains;
@@ -73,7 +73,7 @@ QStringList DAQDeviceFunctionExtraction::getGainsList() {
 
 QStringList DAQDeviceFunctionExtraction::getRangesList() {
     QStringList ranges;
-    if (olDaEnumSSCaps(board.hdass, OL_ENUM_RANGES, AddRangeList, (long)&ranges) != OLNOERROR) {
+    if (olDaEnumSSCaps(board.hdass, OL_ENUM_RANGES, AddRangeList, (LPARAM)&ranges) != OLNOERROR) {
         return QStringList();
     }
     return ranges;
@@ -81,7 +81,7 @@ QStringList DAQDeviceFunctionExtraction::getRangesList() {
 
 QStringList DAQDeviceFunctionExtraction::getFiltersList() {
     QStringList filters;
-    if (olDaEnumSSCaps(board.hdass, OL_ENUM_FILTERS, AddFilterList, (long)&filters) != OLNOERROR) {
+    if (olDaEnumSSCaps(board.hdass, OL_ENUM_FILTERS, AddFilterList, (LPARAM)&filters) != OLNOERROR) {
         return QStringList();
     }
     return filters;
