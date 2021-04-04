@@ -18,7 +18,7 @@ public:
     ~DAQDeviceFunctionExtractionWizardPage1ChooseDevice();
     void UpdateDevicesList(const QStringList&);
     QString GetDeviceName();
-    void SetDAQDevicePtr(DAQDeviceFunctionExtraction*);
+    void SetDAQDevicePtr(DAQDeviceInterface*);
     bool isComplete() const;
 
 private slots:
@@ -26,7 +26,7 @@ private slots:
 
 private:
     Ui::DAQDeviceFunctionExtractionWizardPage1ChooseDevice *ui;
-    DAQDeviceFunctionExtraction *ptr;
+    DAQDeviceInterface *ptr;
 };
 
 #endif // DAQDEVICEFUNCTIONEXTRACTIONWIZARDPAGE1CHOOSEDEVICE_H

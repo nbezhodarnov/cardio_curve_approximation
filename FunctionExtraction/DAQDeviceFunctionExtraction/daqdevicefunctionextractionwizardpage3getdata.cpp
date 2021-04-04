@@ -26,7 +26,7 @@ DAQDeviceFunctionExtractionWizardPage3GetData::~DAQDeviceFunctionExtractionWizar
     delete ui;
 }
 
-void DAQDeviceFunctionExtractionWizardPage3GetData::SetDAQDevicePtr(DAQDeviceFunctionExtraction *board)
+void DAQDeviceFunctionExtractionWizardPage3GetData::SetDAQDevicePtr(DAQDeviceInterface *board)
 {
     ptr = board;
     getDataTimer.setInterval(ptr->getFrequency());

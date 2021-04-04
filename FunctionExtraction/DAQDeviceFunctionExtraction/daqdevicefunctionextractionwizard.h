@@ -22,7 +22,7 @@ class DAQDeviceFunctionExtractionWizard : public QWizard
 public:
     explicit DAQDeviceFunctionExtractionWizard(QWidget *parent = nullptr);
     ~DAQDeviceFunctionExtractionWizard();
-    void SetDAQDevicePtr(DAQDeviceFunctionExtraction*);
+    void SetDAQDevicePtr(DAQDeviceInterface*);
     void SetFunctionPtr(QList<FunctionElement>*);
 
 private slots:
@@ -30,7 +30,7 @@ private slots:
 
 private:
     Ui::DAQDeviceFunctionExtractionWizard *ui;
-    DAQDeviceFunctionExtraction *boardInterface;
+    DAQDeviceInterface *boardInterface;
     unsigned int previousPageId;
     QList<FunctionElement> *function;
 };

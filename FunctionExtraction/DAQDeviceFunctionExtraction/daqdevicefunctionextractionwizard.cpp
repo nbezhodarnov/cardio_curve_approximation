@@ -16,7 +16,7 @@ DAQDeviceFunctionExtractionWizard::~DAQDeviceFunctionExtractionWizard()
     delete ui;
 }
 
-void DAQDeviceFunctionExtractionWizard::SetDAQDevicePtr(DAQDeviceFunctionExtraction *boardInterfaceInput)
+void DAQDeviceFunctionExtractionWizard::SetDAQDevicePtr(DAQDeviceInterface *boardInterfaceInput)
 {
     boardInterface = boardInterfaceInput;
     ui->wizardPage1ChooseDevice->SetDAQDevicePtr(boardInterface);

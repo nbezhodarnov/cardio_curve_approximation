@@ -17,7 +17,7 @@ class DAQDeviceFunctionExtractionWizardPage3GetData : public QWizardPage
 public:
     explicit DAQDeviceFunctionExtractionWizardPage3GetData(QWidget *parent = nullptr);
     ~DAQDeviceFunctionExtractionWizardPage3GetData();
-    void SetDAQDevicePtr(DAQDeviceFunctionExtraction*);
+    void SetDAQDevicePtr(DAQDeviceInterface*);
     void SetDataPtr(QList<FunctionElement>*);
     void UpdateRange();
     bool isComplete() const;
@@ -35,7 +35,7 @@ private:
     void StopEvent();
 
     Ui::DAQDeviceFunctionExtractionWizardPage3GetData *ui;
-    DAQDeviceFunctionExtraction *ptr;
+    DAQDeviceInterface *ptr;
     bool endButtonClicked;
     QList<FunctionElement> *data;
     QList<FunctionElement> temp;

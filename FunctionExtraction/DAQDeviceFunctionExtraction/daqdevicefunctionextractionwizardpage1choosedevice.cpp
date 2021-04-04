@@ -28,7 +28,7 @@ QString DAQDeviceFunctionExtractionWizardPage1ChooseDevice::GetDeviceName()
     return ui->deviceComboBox->currentText();
 }
 
-void DAQDeviceFunctionExtractionWizardPage1ChooseDevice::SetDAQDevicePtr(DAQDeviceFunctionExtraction *input)
+void DAQDeviceFunctionExtractionWizardPage1ChooseDevice::SetDAQDevicePtr(DAQDeviceInterface *input)
 {
     ptr = input;
 }
