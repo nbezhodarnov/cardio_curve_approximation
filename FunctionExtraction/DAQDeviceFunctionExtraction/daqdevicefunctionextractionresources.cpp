@@ -15,9 +15,29 @@ int DisplayErrorMessage(const char* str) {
 }
 
 BOOL CALLBACK AddBoardList(PTSTR lpszName, PTSTR lpszEntry, LPARAM lParam) {
-    wchar_t str[STR_LENGTH];
-    wsprintf(str, L"%s (%s)", lpszName, lpszEntry);
-    ((QStringList*)lParam)->append(QString::fromWCharArray(str));
+    char str[STR_LENGTH];
+    char *name = (char*)lpszName, *entry = (char*)lpszEntry;
+    unsigned int name_index = 0, str_index = 0;
+    while (name[name_index] != '\0') {
+        str[str_index] = name[name_index];
+        str_index++;
+        name_index++;
+    }
+    str[str_index] = ' ';
+    str_index++;
+    str[str_index] = '(';
+    str_index++;
+    unsigned int entry_index = 0;
+    while (entry[entry_index] != '\0') {
+        str[str_index] = entry[entry_index];
+        str_index++;
+        entry_index++;
+    }
+    str[str_index] = ')';
+    str_index++;
+    str[str_index] = '\0';
+    str_index++;
+    ((QStringList*)lParam)->append(QString::fromUtf8(str));
     return true;
 }
 

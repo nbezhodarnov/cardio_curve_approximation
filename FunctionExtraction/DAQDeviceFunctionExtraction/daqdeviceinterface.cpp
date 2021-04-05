@@ -10,9 +10,16 @@ QStringList DAQDeviceInterface::getBoardsList() {
 }
 
 bool DAQDeviceInterface::connect(const QString &boardName) {
-    wchar_t *name = new wchar_t[80];
-    boardName.toWCharArray(name);
-    if (olDaInitialize(name, &board.hdrvr) != OLNOERROR) {
+    char *name = new char[80];
+    QByteArray str = boardName.toUtf8();
+    for (unsigned int i = 0; i < (unsigned int)str.size(); i++) {
+        if (str[i] == ' ') {
+            name[i] = '\0';
+            break;
+        }
+        name[i] = str[i];
+    }
+    if (olDaInitialize((wchar_t*)name, &board.hdrvr) != OLNOERROR) {
         DisplayErrorMessage("Ошибка при подключении к устройству!");
         delete []name;
         return false;

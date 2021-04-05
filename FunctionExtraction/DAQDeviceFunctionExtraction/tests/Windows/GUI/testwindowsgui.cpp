@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "FunctionExtraction/DAQDeviceFunctionExtraction/olmem.h"
 #include "FunctionExtraction/DAQDeviceFunctionExtraction/oldaapi.h"
 #include "FunctionExtraction/DAQDeviceFunctionExtraction/tests/Windows/GUI/testwindowsgui.h"
@@ -5,12 +7,16 @@
 Device device;
 
 ECODE WINAPI olDaEnumBoards (DABRDPROC pfnDaBrdProc, LPARAM lParam) {
-    pfnDaBrdProc(L"Board1", L"1", lParam);
-    pfnDaBrdProc(L"Board2", L"2", lParam);
-    return OLNOERROR;
+    char str[11] = {68, 84, 57, 56, 48, 50, 40, 48, 48, 41, 0}, str2[7] = {68, 116, 57, 56, 48, 48, 0};
+        pfnDaBrdProc((wchar_t*)str, (wchar_t*)str2, lParam);
+        str[5] = 51;
+        str2[5] = 51;
+        pfnDaBrdProc((wchar_t*)str, (wchar_t*)str2, lParam);
+        return OLNOERROR;
 }
 
 ECODE WINAPI olDaInitialize (PTSTR pszName, PHDEV phDev) {
+    std::cout << (char*)pszName << '\n';
     return OLNOERROR;
 }
 
