@@ -35,6 +35,9 @@ void DAQDeviceFunctionExtractionWizard::on_DAQDeviceFunctionExtractionWizard_cur
     }
     switch (id) {
     case 0: {
+        if (previousPageId != 0) {
+            boardInterface->disconnect();
+        }
         previousPageId = 0;
         ui->wizardPage1ChooseDevice->UpdateDevicesList(boardInterface->getBoardsList());
         break;
@@ -46,6 +49,7 @@ void DAQDeviceFunctionExtractionWizard::on_DAQDeviceFunctionExtractionWizard_cur
         }
         previousPageId = 1;
         if (boardInterface->connect(ui->wizardPage1ChooseDevice->GetDeviceName()) == false) {
+            boardInterface->disconnect();
             back();
             break;
         }
