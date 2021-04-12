@@ -26,7 +26,7 @@ bool DAQDeviceInterface::connect(const QString &boardName) {
     }
     delete []name;
 
-    unsigned int numberADs, dma, gainsup, cap;
+    unsigned int numberADs, dma;
     QStringList gains, ranges, filters;
 
     if (olDaGetDevCaps(board.hdrvr, OLDC_ADELEMENTS, &numberADs) != OLNOERROR) {
@@ -37,7 +37,7 @@ bool DAQDeviceInterface::connect(const QString &boardName) {
         DisplayErrorMessage("Ошибка при подключении к A/D подсистеме!");
         return false;
     }
-    if ((olDaGetSSCapsEx(board.hdass, OLSSCE_MAXTHROUGHPUT, &frequency) != OLNOERROR) || (olDaGetSSCaps(board.hdass, OLSSC_NUMDMACHANS, &dma) != OLNOERROR) || (olDaGetSSCaps(board.hdass, OLSSC_SUP_PROGRAMGAIN, &gainsup) != OLNOERROR) || (olDaGetSSCaps(board.hdass, OLSSC_SUP_TRIGSCAN, &cap) != OLNOERROR) || (olDaGetSSCaps(board.hdass, OLSSC_NUMCHANNELS, &channelsCount) != OLNOERROR) || (olDaGetEncoding(board.hdass, &encoding) != OLNOERROR) || (olDaGetSSCaps(board.hdass, OLSSC_RETURNS_FLOATS, &bReturnsFloats) != OLNOERROR)) {
+    if ((olDaGetSSCapsEx(board.hdass, OLSSCE_MAXTHROUGHPUT, &frequency) != OLNOERROR) || (olDaGetSSCaps(board.hdass, OLSSC_NUMDMACHANS, &dma) != OLNOERROR) || (olDaGetSSCaps(board.hdass, OLSSC_SUP_PROGRAMGAIN, &gainsup) != OLNOERROR) || (olDaGetSSCaps(board.hdass, OLSSC_NUMCHANNELS, &channelsCount) != OLNOERROR) || (olDaGetEncoding(board.hdass, &encoding) != OLNOERROR) || (olDaGetSSCaps(board.hdass, OLSSC_RETURNS_FLOATS, &bReturnsFloats) != OLNOERROR)) {
         DisplayErrorMessage("Ошибка при чтении параметров устройства!");
         return false;
     }
@@ -49,7 +49,7 @@ bool DAQDeviceInterface::connect(const QString &boardName) {
         frequency = 1000.0;
     }
 
-    if ((olDaSetDataFlow(board.hdass, OL_DF_CONTINUOUS) != OLNOERROR) || (olDaSetWrapMode(board.hdass, OL_WRP_NONE) != OLNOERROR) || (olDaSetClockFrequency(board.hdass, frequency) != OLNOERROR) || (olDaSetDmaUsage(board.hdass, dma) != OLNOERROR) || ((cap) && (olDaSetRetriggerFrequency(board.hdass, 10.0) != OLNOERROR))) {
+    if ((olDaSetDataFlow(board.hdass, OL_DF_CONTINUOUS) != OLNOERROR) || (olDaSetWrapMode(board.hdass, OL_WRP_MULTIPLE) != OLNOERROR) || (olDaSetClockFrequency(board.hdass, frequency) != OLNOERROR) || (olDaSetDmaUsage(board.hdass, dma) != OLNOERROR)) {
         DisplayErrorMessage("Ошибка при выставлении параметров устройства!");
         return false;
     }
@@ -97,7 +97,8 @@ Range DAQDeviceInterface::getRange() {
 }
 
 bool DAQDeviceInterface::setParameters(unsigned int channel, double gain, Range range, unsigned int filter) {
-    if (((gain > 0.0) && ((olDaSetGainListEntry(board.hdass, 0, gain) != OLNOERROR) || (olDaSetChannelListEntry(board.hdass, 0, channel) != OLNOERROR))) || (olDaSetChannelFilter(board.hdass, 0, filter) != OLNOERROR) || (olDaSetRange(board.hdass, range.max, range.min) != OLNOERROR)) {
+    olDaSetEncoding( board.hdass, OL_ENC_BINARY );
+    if (((gainsup) && ((gain <= 0.0) || (olDaSetGainListEntry(board.hdass, 0, gain) != OLNOERROR))) || ((olDaSetChannelListEntry(board.hdass, 0, channel) != OLNOERROR) || olDaSetChannelListSize(board.hdass, 1) != OLNOERROR) || (olDaSetChannelFilter(board.hdass, 0, filter) != OLNOERROR) || (olDaSetRange(board.hdass, range.max, range.min) != OLNOERROR)) {
         DisplayErrorMessage("Ошибка при выставлении параметров устройства!");
         return false;
     }
@@ -115,7 +116,6 @@ bool DAQDeviceInterface::start() {
         olDmFreeBuffer(board.hbuf);
         board.hbuf = NULL;
     }
-    unsigned int i;
     unsigned int bufferbytes;
 
     if ((olDaGetResolution(board.hdass,&bufferbytes) != OLNOERROR) || (olDaGetChannelListSize(board.hdass, &listsize) != OLNOERROR)) {
@@ -127,12 +127,7 @@ bool DAQDeviceInterface::start() {
     else
         resolution = 2;
 
-    for ( i=0; i < NUM_BUFFERS; i++ ) {
-        if ((olDmCallocBuffer(0, 0, 1000, resolution, &board.hbuf) != OLNOERROR) || (olDaPutBuffer(board.hdass, board.hbuf) != OLNOERROR)) {
-            DisplayErrorMessage("Ошибка настройки буферов!");
-            return false;
-        }
-    }
+    board.hbuf = NULL;
 
     if (olDaStart(board.hdass) != OLNOERROR) {
         DisplayErrorMessage("Ошибка запуска чтения данных!");
@@ -145,8 +140,9 @@ bool DAQDeviceInterface::start() {
 QList<FunctionElement> DAQDeviceInterface::getData() {
     unsigned long bufsize;
     unsigned char *wave;
-    if ((board.hbuf == NULL) || (olDmGetValidSamples(board.hbuf, &bufsize) != OLNOERROR) || (bufsize == 0) || (olDmGetBufferPtr(board.hbuf, (void**)&wave) != OLNOERROR)) {
-        DisplayErrorMessage("Ошибки при чтении данных с устройства!");
+    board.hbuf = NULL;
+    if ((olDaGetBuffer(board.hdass, &board.hbuf) != OLNOERROR) || (board.hbuf == NULL) || (olDmGetValidSamples(board.hbuf, &bufsize) != OLNOERROR) || (bufsize == 0) || (olDmGetBufferPtr(board.hbuf, (void**)&wave) != OLNOERROR)) {
+        //DisplayErrorMessage("Ошибки при чтении данных с устройства!");
         return QList<FunctionElement>();
     }
 
@@ -190,6 +186,9 @@ QList<FunctionElement> DAQDeviceInterface::getData() {
 
             result.append({x, ((rangeBoard.max / gainBoard) - (rangeBoard.min / gainBoard)) / res * tempdata + (rangeBoard.min / gainBoard)});
         }
+    }
+    if (olDaPutBuffer(board.hdass, board.hbuf) != OLNOERROR) {
+        DisplayErrorMessage("Ошибки при чтении данных с устройства!");
     }
     return result;
 }

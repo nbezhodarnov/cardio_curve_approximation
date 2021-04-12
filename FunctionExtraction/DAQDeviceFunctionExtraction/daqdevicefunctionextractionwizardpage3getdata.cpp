@@ -77,12 +77,12 @@ void DAQDeviceFunctionExtractionWizardPage3GetData::on_endPushButton_clicked()
 void DAQDeviceFunctionExtractionWizardPage3GetData::GetData()
 {
     if ((ptr != nullptr) && (data != nullptr)) {
-        int previousSize = temp.size();
+        //int previousSize = temp.size();
         temp.append(ptr->getData());
-        if (temp.size() == previousSize) {
+        /*if (temp.size() == previousSize) {
             ptr->abort();
             StopEvent();
-        }
+        }*/
     }
 }
 

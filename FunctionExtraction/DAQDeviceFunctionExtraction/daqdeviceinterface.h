@@ -41,6 +41,7 @@ private:
     unsigned int bReturnsFloats;
     unsigned int resolution;
     unsigned int listsize;
+    unsigned int gainsup;
 };
 
 #endif // DAQDEVICEINTERFACE_H
