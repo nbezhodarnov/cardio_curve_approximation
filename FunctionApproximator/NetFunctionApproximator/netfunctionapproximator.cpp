@@ -147,9 +147,9 @@ FunctionApproximation NetFunctionApproximator::approximate(const Function &funct
     }
 
 
-    out << "a1 = " << a1 << ", b1 = " << b1 << ", c1 = " << c1 << '\n' << Qt::flush;
+    out << "a1 = " << a1 << ", b1 = " << b1 << ", c1 = " << c1 << '\n' << flush;
     if (are_two_extremums) {
-        out << "a2 = " << a2 << ", b2 = " << b2 << ", c2 = " << c2 << "\n\n" << Qt::flush;
+        out << "a2 = " << a2 << ", b2 = " << b2 << ", c2 = " << c2 << "\n\n" << flush;
     } else {
         a1 /= 2;
         a2 /= 2;
@@ -364,15 +364,15 @@ FunctionApproximation NetFunctionApproximator::approximate(const Function &funct
                 min_value = INFINITY;
             }
         }
-        out << "a1 = " << a1 << ", b1 = " << b1 << ", c1 = " << c1 << '\n' << Qt::flush;
-        out << "a2 = " << a2 << ", b2 = " << b2 << ", c2 = " << c2 << '\n' << Qt::flush;
-        out << min_value << ' ' << previous_value << '\n' << Qt::flush;
+        out << "a1 = " << a1 << ", b1 = " << b1 << ", c1 = " << c1 << '\n' << flush;
+        out << "a2 = " << a2 << ", b2 = " << b2 << ", c2 = " << c2 << '\n' << flush;
+        out << min_value << ' ' << previous_value << '\n' << flush;
 
         for (uint8_t i = 0; i < 6; ++i) {
-            out << (int)min_point_indexes[i] << ' ' << Qt::flush;
+            out << (int)min_point_indexes[i] << ' ' << flush;
         }
-        out << '\n' << step1 << ' ' << step2 << ' ' << step3 << '\n' << Qt::flush;
-        out << "\n\n" << Qt::flush;
+        out << '\n' << step1 << ' ' << step2 << ' ' << step3 << '\n' << flush;
+        out << "\n\n" << flush;
     }
 
     a1 = std::abs(a1);
@@ -381,8 +381,8 @@ FunctionApproximation NetFunctionApproximator::approximate(const Function &funct
     b2 = std::abs(b2);
 
 
-    out << "a1 = " << a1 << ", b1 = " << b1 << ", c1 = " << c1 << '\n' << Qt::flush;
-    out << "a2 = " << a2 << ", b2 = " << b2 << ", c2 = " << c2 << '\n' << Qt::flush;
+    out << "a1 = " << a1 << ", b1 = " << b1 << ", c1 = " << c1 << '\n' << flush;
+    out << "a2 = " << a2 << ", b2 = " << b2 << ", c2 = " << c2 << '\n' << flush;
 
     return FunctionApproximation(a1, b1, c1, a2, b2, c2, coefficient);
 }

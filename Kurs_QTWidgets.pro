@@ -24,7 +24,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 CONFIG     += debug
 
-GUITEST = yes
+#GUITEST = yes
 
 SOURCES += \
     FunctionApproximator/NetFunctionApproximator/netfunctionapproximator.cpp \
@@ -62,6 +62,7 @@ FORMS += \
 
 win32 {
 SOURCES += \
+    FunctionExtraction/DAQDeviceFunctionExtraction/daqdeviceinterface.cpp \
     FunctionExtraction/DAQDeviceFunctionExtraction/daqdevicefunctionextraction.cpp \
     FunctionExtraction/DAQDeviceFunctionExtraction/daqdevicefunctionextractionwizard.cpp \
     FunctionExtraction/DAQDeviceFunctionExtraction/daqdevicefunctionextractionresources.cpp \
@@ -72,6 +73,7 @@ SOURCES += \
     FunctionExtraction/DAQDeviceFunctionExtraction/daqdevicefunctionextractionwizardpage5finish.cpp
 
 HEADERS += \
+    FunctionExtraction/DAQDeviceFunctionExtraction/daqdeviceinterface.h \
     FunctionExtraction/DAQDeviceFunctionExtraction/daqdevicefunctionextraction.h \
     FunctionExtraction/DAQDeviceFunctionExtraction/daqdevicefunctionextractionwizard.h \
     FunctionExtraction/DAQDeviceFunctionExtraction/daqdevicefunctionextractionresources.h \
@@ -107,5 +109,3 @@ FORMS += \
         }
     }
 }
-
-DISTFILES +=
