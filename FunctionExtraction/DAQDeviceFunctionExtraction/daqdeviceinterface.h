@@ -11,6 +11,8 @@
 #include "FunctionExtraction/DAQDeviceFunctionExtraction/olerrors.h"
 #include "FunctionExtraction/DAQDeviceFunctionExtraction/daqdevicefunctionextractionresources.h"
 
+void __stdcall extractData(unsigned int, unsigned int, long);
+
 class DAQDeviceInterface
 {
 public:
@@ -30,6 +32,15 @@ public:
     void stop();
     void disconnect();
 
+    void addData(const QList<FunctionElement>&);
+    Board& getBoard();
+    unsigned int getEncoding();
+    unsigned int DoReturnFloats();
+    unsigned int getResolution();
+    unsigned int getListSize();
+    unsigned int getGainBoard();
+    double& getX();
+
 private:
     Board board;
     Range rangeBoard;
@@ -42,6 +53,7 @@ private:
     unsigned int resolution;
     unsigned int listsize;
     unsigned int gainsup;
+    QList<FunctionElement> data;
 };
 
 #endif // DAQDEVICEINTERFACE_H

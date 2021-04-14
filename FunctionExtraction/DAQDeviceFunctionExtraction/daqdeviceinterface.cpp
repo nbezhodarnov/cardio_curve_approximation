@@ -1,4 +1,98 @@
 #include "daqdeviceinterface.h"
+#include "oldadefs.h"
+
+void __stdcall extractData(unsigned int message, unsigned int wParam, long lParam) {
+    Q_UNUSED(wParam)
+    switch (message) {
+    case OLDA_WM_BUFFER_REUSED:   /* message: buffer reused  */
+        break;
+
+    case OLDA_WM_BUFFER_DONE: {   /* message: buffer done  */
+        Board &board = ((DAQDeviceInterface*)lParam)->getBoard();
+        double frequency = ((DAQDeviceInterface*)lParam)->getFrequency();
+        Range rangeBoard = ((DAQDeviceInterface*)lParam)->getRange();
+        unsigned int gainBoard = ((DAQDeviceInterface*)lParam)->getGainBoard();
+        unsigned int encoding = ((DAQDeviceInterface*)lParam)->getEncoding();
+        unsigned int bReturnsFloats = ((DAQDeviceInterface*)lParam)->DoReturnFloats();
+        unsigned int resolution = ((DAQDeviceInterface*)lParam)->getResolution();
+        unsigned int listsize = ((DAQDeviceInterface*)lParam)->getListSize();
+        double &x = ((DAQDeviceInterface*)lParam)->getX();
+        unsigned long bufsize;
+        unsigned char *wave;
+        //board.hbuf = NULL;
+        if ((olDaGetBuffer(board.hdass, &board.hbuf) != OLNOERROR) || (board.hbuf == NULL) || (olDmGetValidSamples(board.hbuf, &bufsize) != OLNOERROR) || (bufsize == 0) || (olDmGetBufferPtr(board.hbuf, (void**)&wave) != OLNOERROR)) {
+            //DisplayErrorMessage("Ошибки при чтении данных с устройства!");
+            return;
+        }
+
+        QList<FunctionElement> result;
+        double step = 1.0 / frequency;
+        long res = 1L << resolution;
+        double amp = ((rangeBoard.max / gainBoard - rangeBoard.min / gainBoard) / res);
+
+        if (bReturnsFloats) {
+            float* pFloatData;
+            pFloatData = (float*)wave;
+            for (unsigned int i = 0; i < bufsize; i++, x += step) {
+                result.append({x, pFloatData[i]});
+            }
+        } else if (encoding == OL_ENC_BINARY) {
+            for (unsigned int i = 0; i < bufsize * resolution; i = i + (resolution * listsize), x += step) {
+                long tempdata = 0;
+                for (unsigned int k = resolution - 1; k > 0; k--) {
+                    tempdata = tempdata + (unsigned char)wave[i + k];
+                    tempdata <<= 8;
+                }
+                tempdata = tempdata + (unsigned char)wave[i];
+
+                if (tempdata < 0) {
+                    result.append({x, (tempdata + res) * amp + (rangeBoard.min / gainBoard)});
+                } else {
+                    result.append({x, tempdata * amp + (rangeBoard.min / gainBoard)});
+                }
+            }
+        } else {
+            for (unsigned int i = 0; i < bufsize * resolution; i = i + (resolution * listsize), x += step) {
+                unsigned long tempdata = 0;
+                for (unsigned int k = resolution - 1; k > 0; k--) {
+                    tempdata = tempdata + (unsigned char)wave[i + k];
+                    tempdata<<=8;
+                }
+                tempdata = tempdata + (unsigned char)wave[i];
+
+                tempdata ^= 1L << (resolution - 1);
+                tempdata &= (1L << resolution) - 1;
+
+                result.append({x, ((rangeBoard.max / gainBoard) - (rangeBoard.min / gainBoard)) / res * tempdata + (rangeBoard.min / gainBoard)});
+            }
+        }
+        ((DAQDeviceInterface*)lParam)->addData(result);
+        if (olDaPutBuffer(board.hdass, board.hbuf) != OLNOERROR) {
+            DisplayErrorMessage("Ошибки при чтении данных с устройства!");
+        }
+        return;
+    }
+    case OLDA_WM_QUEUE_DONE:
+    case OLDA_WM_QUEUE_STOPPED:
+        /* using wrap multiple - if these message are received */
+        /* acquisition has stopped.                            */
+        return;   /* Did process a message */
+
+    case OLDA_WM_TRIGGER_ERROR:
+        /* Process trigger error message */
+        DisplayErrorMessage("Ошибка триггера!");
+        return;   /* Did process a message */
+
+    case OLDA_WM_OVERRUN_ERROR:
+        /* Process underrun error message */
+        DisplayErrorMessage("Перегрузка!");
+        return;   /* Did process a message */
+
+    default:      /* message: received a command */
+        break;
+    }
+    return;               /* Didn't process a message */
+}
 
 QStringList DAQDeviceInterface::getBoardsList() {
     QStringList boards;
@@ -51,7 +145,7 @@ bool DAQDeviceInterface::connect(const QString &boardName) {
     }
 
     unsigned int cap;
-    if ((olDaSetDataFlow(board.hdass, OL_DF_CONTINUOUS) != OLNOERROR) || (olDaSetWrapMode(board.hdass, OL_WRP_NONE) != OLNOERROR) || ((olDaGetSSCaps( board.hdass, OLSSC_SUP_TRIGSCAN, &cap ) != OLNOERROR) || (cap && olDaSetRetriggerFrequency(board.hdass, 10.0) != OLNOERROR)) || (olDaSetClockFrequency(board.hdass, frequency) != OLNOERROR) || (olDaSetDmaUsage(board.hdass, dma) != OLNOERROR)) {
+    if ((olDaSetDataFlow(board.hdass, OL_DF_CONTINUOUS) != OLNOERROR) || (olDaSetWrapMode(board.hdass, OL_WRP_MULTIPLE) != OLNOERROR) || ((olDaGetSSCaps( board.hdass, OLSSC_SUP_TRIGSCAN, &cap ) != OLNOERROR) || (cap && olDaSetRetriggerFrequency(board.hdass, 10.0) != OLNOERROR)) || (olDaSetClockFrequency(board.hdass, frequency) != OLNOERROR) || (olDaSetDmaUsage(board.hdass, dma) != OLNOERROR)) {
         DisplayErrorMessage("Ошибка при выставлении параметров устройства!");
         return false;
     }
@@ -129,13 +223,15 @@ bool DAQDeviceInterface::start() {
     else
         resolution = 2;
 
+    olDaSetNotificationProcedure(board.hdass,&extractData,(long)this);
+
     unsigned int buffer_size = frequency / 10;
     for (unsigned int i=0; i < NUM_BUFFERS; i++ ) {
         olDmCallocBuffer(0, 0, buffer_size, bufferbytes, &board.hbuf);
         olDaPutBuffer(board.hdass, board.hbuf);
     }
 
-    if ((olDmCallocBuffer(0, 0, buffer_size / 2, bufferbytes, &board.hbuf) != OLNOERROR) || (olDaStart(board.hdass) != OLNOERROR)) {
+    if ((olDaConfig(board.hdass) != OLNOERROR) || (olDaStart(board.hdass) != OLNOERROR)) {
         DisplayErrorMessage("Ошибка запуска чтения данных!");
         return false;
     }
@@ -144,58 +240,13 @@ bool DAQDeviceInterface::start() {
 }
 
 QList<FunctionElement> DAQDeviceInterface::getData() {
-    unsigned long bufsize;
-    unsigned char *wave;
-    //board.hbuf = NULL;
-    if ((olDaGetBuffer(board.hdass, &board.hbuf) != OLNOERROR) || (board.hbuf == NULL) || (olDmGetValidSamples(board.hbuf, &bufsize) != OLNOERROR) || (bufsize == 0) || (olDmGetBufferPtr(board.hbuf, (void**)&wave) != OLNOERROR)) {
-        //DisplayErrorMessage("Ошибки при чтении данных с устройства!");
-        return QList<FunctionElement>();
-    }
-
+    unsigned int size = data.size();
     QList<FunctionElement> result;
-    double step = 1.0 / frequency;
-    long res = 1L << resolution;
-    double amp = ((rangeBoard.max / gainBoard - rangeBoard.min / gainBoard) / res);
-
-    if (bReturnsFloats) {
-        float* pFloatData;
-        pFloatData = (float*)wave;
-        for (unsigned int i = 0; i < bufsize; i++, x += step) {
-            result.append({x, pFloatData[i]});
-        }
-    } else if (encoding == OL_ENC_BINARY) {
-        for (unsigned int i = 0; i < bufsize * resolution; i = i + (resolution * listsize), x += step) {
-            long tempdata = 0;
-            for (unsigned int k = resolution - 1; k > 0; k--) {
-                tempdata = tempdata + (unsigned char)wave[i + k];
-                tempdata <<= 8;
-            }
-            tempdata = tempdata + (unsigned char)wave[i];
-
-            if (tempdata < 0) {
-                result.append({x, (tempdata + res) * amp + (rangeBoard.min / gainBoard)});
-            } else {
-                result.append({x, tempdata * amp + (rangeBoard.min / gainBoard)});
-            }
-        }
-    } else {
-        for (unsigned int i = 0; i < bufsize * resolution; i = i + (resolution * listsize), x += step) {
-            unsigned long tempdata = 0;
-            for (unsigned int k = resolution - 1; k > 0; k--) {
-                tempdata = tempdata + (unsigned char)wave[i + k];
-                tempdata<<=8;
-            }
-            tempdata = tempdata + (unsigned char)wave[i];
-
-            tempdata ^= 1L << (resolution - 1);
-            tempdata &= (1L << resolution) - 1;
-
-            result.append({x, ((rangeBoard.max / gainBoard) - (rangeBoard.min / gainBoard)) / res * tempdata + (rangeBoard.min / gainBoard)});
-        }
+    for (unsigned int i = 0; i < size; i++) {
+        result.append(*data.begin());
+        data.erase(data.begin());
     }
-    if (olDaPutBuffer(board.hdass, board.hbuf) != OLNOERROR) {
-        DisplayErrorMessage("Ошибки при чтении данных с устройства!");
-    }
+
     return result;
 }
 
@@ -222,4 +273,36 @@ void DAQDeviceInterface::stop() {
 void DAQDeviceInterface::disconnect() {
     olDaReleaseDASS(board.hdass);
     olDaTerminate(board.hdrvr);
+}
+
+void DAQDeviceInterface::addData(const QList<FunctionElement> &data_input) {
+    data.append(data_input);
+}
+
+Board& DAQDeviceInterface::getBoard() {
+    return board;
+}
+
+unsigned int DAQDeviceInterface::getEncoding() {
+    return encoding;
+}
+
+unsigned int DAQDeviceInterface::DoReturnFloats() {
+    return bReturnsFloats;
+}
+
+unsigned int DAQDeviceInterface::getResolution() {
+    return resolution;
+}
+
+unsigned int DAQDeviceInterface::getListSize() {
+    return listsize;
+}
+
+unsigned int DAQDeviceInterface::getGainBoard() {
+    return gainBoard;
+}
+
+double& DAQDeviceInterface::getX() {
+    return x;
 }

@@ -4,6 +4,8 @@
 #include "FunctionExtraction/DAQDeviceFunctionExtraction/oldaapi.h"
 #include "FunctionExtraction/DAQDeviceFunctionExtraction/oltypes.h"
 
+#define WM_USER                         0x0400
+
 #ifndef RC_INVOKED
 
 #ifdef _WIN32
