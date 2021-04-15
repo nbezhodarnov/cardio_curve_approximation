@@ -2,6 +2,7 @@
 #define DAQDEVICEINTERFACE_H
 
 #include <QStringList>
+#include <QWindow>
 #include <QList>
 
 #include "function.h"
@@ -13,7 +14,7 @@
 
 void __stdcall extractData(unsigned int, unsigned int, long);
 
-class DAQDeviceInterface
+class DAQDeviceInterface : public QWindow
 {
 public:
     DAQDeviceInterface() = default;
@@ -40,6 +41,9 @@ public:
     unsigned int getListSize();
     unsigned int getGainBoard();
     double& getX();
+
+protected:
+    bool nativeEvent(const QByteArray&, void*, long*);
 
 private:
     Board board;

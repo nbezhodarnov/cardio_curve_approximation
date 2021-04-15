@@ -1,6 +1,8 @@
 #include "daqdeviceinterface.h"
 #include "oldadefs.h"
 
+#include <winuser.h>
+
 void __stdcall extractData(unsigned int message, unsigned int wParam, long lParam) {
     Q_UNUSED(wParam)
     switch (message) {
@@ -223,7 +225,7 @@ bool DAQDeviceInterface::start() {
     else
         resolution = 2;
 
-    olDaSetNotificationProcedure(board.hdass,&extractData,(long)this);
+    olDaSetWndHandle(board.hdass,(HWND)winId(),(long)this);
 
     unsigned int buffer_size = frequency / 10;
     for (unsigned int i=0; i < NUM_BUFFERS; i++ ) {
@@ -305,4 +307,11 @@ unsigned int DAQDeviceInterface::getGainBoard() {
 
 double& DAQDeviceInterface::getX() {
     return x;
+}
+
+bool DAQDeviceInterface::nativeEvent(const QByteArray &eventType, void *message, long *result) {
+    Q_UNUSED(eventType)
+    Q_UNUSED(result)
+    extractData(((MSG*)message)->message, 0, (long)this);
+    return false;
 }
