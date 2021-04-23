@@ -14,6 +14,9 @@ DAQDeviceFunctionExtractionWizard::DAQDeviceFunctionExtractionWizard(QWidget *pa
 DAQDeviceFunctionExtractionWizard::~DAQDeviceFunctionExtractionWizard()
 {
     delete ui;
+    if (boardInterface != nullptr) {
+        boardInterface->disconnect();
+    }
 }
 
 void DAQDeviceFunctionExtractionWizard::SetDAQDevicePtr(DAQDeviceInterface *boardInterfaceInput)
