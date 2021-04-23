@@ -46,7 +46,7 @@
      <item>
       <widget class="QLabel" name="gainLabel">
        <property name="text">
-        <string>Предел</string>
+        <string>Множитель</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>
