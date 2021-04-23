@@ -275,6 +275,7 @@ ECODE WINAPI olDaStart (HDASS) {
     for (unsigned int i = 0; i < device.buffers.size(); i++) {
         device.buffers[i]->status = ReadyToUpdate;
     }
+    device.buffer_index = 0;
     device.timer.setInterval(100);
     device.value = 0;
     device.connection = QObject::connect(&device.timer, &QTimer::timeout, UpdateBuffer);
