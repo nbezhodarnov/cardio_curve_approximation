@@ -22,10 +22,6 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-CONFIG     += release
-
-#GUITEST = yes
-
 SOURCES += \
     FunctionApproximator/NetFunctionApproximator/netfunctionapproximator.cpp \
     FunctionApproximator/abstractfunctionapproximator.cpp \
@@ -96,6 +92,10 @@ FORMS += \
     FunctionExtraction/DAQDeviceFunctionExtraction/daqdevicefunctionextractionwizardpage3getdata.ui \
     FunctionExtraction/DAQDeviceFunctionExtraction/daqdevicefunctionextractionwizardpage4writetofile.ui \
     FunctionExtraction/DAQDeviceFunctionExtraction/daqdevicefunctionextractionwizardpage5finish.ui
+
+    contains(CONFIG, "qml_debug") {
+        GUITEST = yes
+    }
 
     defined(GUITEST, var) {
         SOURCES += FunctionExtraction/DAQDeviceFunctionExtraction/tests/Windows/GUI/testwindowsgui.cpp
