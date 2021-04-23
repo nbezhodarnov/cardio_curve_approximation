@@ -12,6 +12,8 @@
 #include "FunctionExtraction/DAQDeviceFunctionExtraction/olerrors.h"
 #include "FunctionExtraction/DAQDeviceFunctionExtraction/daqdevicefunctionextractionresources.h"
 
+double convertValueToVolts(float, Range, unsigned int);
+
 void __stdcall extractData(unsigned int, unsigned int, long);
 
 class DAQDeviceInterface : public QWindow

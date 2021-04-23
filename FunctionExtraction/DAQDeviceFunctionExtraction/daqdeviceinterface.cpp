@@ -3,6 +3,10 @@
 
 #include <winuser.h>
 
+double convertValueToVolts(float value, Range range, unsigned int gain) {
+    return value / (double)(1023.75 * gain) + range.min;
+}
+
 void __stdcall extractData(unsigned int message, unsigned int wParam, long lParam) {
     Q_UNUSED(wParam)
     switch (message) {
@@ -36,7 +40,7 @@ void __stdcall extractData(unsigned int message, unsigned int wParam, long lPara
             float* pFloatData;
             pFloatData = (float*)wave;
             for (unsigned int i = 0; i < bufsize; i++, x += step) {
-                result.append({x, pFloatData[i]});
+                result.append({x, convertValueToVolts(pFloatData[i], rangeBoard, gainBoard)});
             }
         } else if (encoding == OL_ENC_BINARY) {
             for (unsigned int i = 0; i < bufsize * resolution; i = i + (resolution * listsize), x += step) {
@@ -48,9 +52,9 @@ void __stdcall extractData(unsigned int message, unsigned int wParam, long lPara
                 tempdata = tempdata + (unsigned char)wave[i];
 
                 if (tempdata < 0) {
-                    result.append({x, (tempdata + res) * amp + (rangeBoard.min / gainBoard)});
+                    result.append({x, convertValueToVolts((tempdata + res) * amp + (rangeBoard.min / gainBoard), rangeBoard, gainBoard)});
                 } else {
-                    result.append({x, tempdata * amp + (rangeBoard.min / gainBoard)});
+                    result.append({x, convertValueToVolts(tempdata * amp + (rangeBoard.min / gainBoard), rangeBoard, gainBoard)});
                 }
             }
         } else {
@@ -65,7 +69,7 @@ void __stdcall extractData(unsigned int message, unsigned int wParam, long lPara
                 tempdata ^= 1L << (resolution - 1);
                 tempdata &= (1L << resolution) - 1;
 
-                result.append({x, ((rangeBoard.max / gainBoard) - (rangeBoard.min / gainBoard)) / res * tempdata + (rangeBoard.min / gainBoard)});
+                result.append({x, convertValueToVolts(((rangeBoard.max / gainBoard) - (rangeBoard.min / gainBoard)) / res * tempdata + (rangeBoard.min / gainBoard), rangeBoard, gainBoard)});
             }
         }
         ((DAQDeviceInterface*)lParam)->addData(result);
