@@ -33,9 +33,11 @@ SOURCES += \
     function.cpp \
     functionapproximation.cpp \
     functionelement.cpp \
+    interactableqcustomplot.cpp \
         main.cpp \
         mainwindow.cpp \
-    qcustomplot.cpp
+    qcustomplot.cpp \
+    rangeselectableqcustomplot.cpp
 
 HEADERS += \
     FunctionApproximator/NetFunctionApproximator/netfunctionapproximator.h \
@@ -48,11 +50,14 @@ HEADERS += \
     function.h \
     functionapproximation.h \
     functionelement.h \
+    interactableqcustomplot.h \
         mainwindow.h \
-    qcustomplot.h
+    qcustomplot.h \
+    rangeselectableqcustomplot.h
 
 FORMS += \
         FunctionExtraction/OldFileFunctionExtraction/oldfilefunctionextractiondialog.ui \
+        interactableqcustomplot.ui \
         mainwindow.ui
 
 win32 {

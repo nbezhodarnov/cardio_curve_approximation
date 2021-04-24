@@ -26,19 +26,9 @@ public:
 private slots:
     void on_make_plot_clicked();
 
-    void mouseMoveEvent(QMouseEvent *event);
-
-    void mouseClickEvent(QMouseEvent *event);
-
-    void mousePressEvent(QMouseEvent *event);
-
-    void mouseReleaseEvent(QMouseEvent *event);
+    void on_rangeSelectionStateChanged(bool);
 
     void on_approximation_start_clicked();
-
-    void plotrender_xaxis_range_changed(const QCPRange &);
-
-    void plotrender_yaxis_range_changed(const QCPRange &);
 
     void on_results_clicked();
 
@@ -46,11 +36,6 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    QCPCurve *verticalLine, *start, *end;
-    bool end_turn;
-    double min_y, max_y, xAxis[2], yAxis[2];
-    unsigned int start_index, end_index;
-    Function function;
     FunctionApproximation approximation;
     AbstractFunctionExtraction *extractor;
     AbstractFunctionApproximator *approximator;
