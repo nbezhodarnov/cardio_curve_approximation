@@ -63,20 +63,20 @@ void RangeSelectableQCustomPlot::plotFunction(const Function &data, const QPen &
         max_min_changed = true;
     }
     if (max_min_changed) {
-        if (this->start->visible()) {
+        if (start->visible()) {
             QVector<double> x_temp(2), y_temp(2);
             x_temp[0] = x_temp[1] = function.getKey(start_index);
             y_temp[0] = min_y - 3;
             y_temp[1] = max_y + 3;
-            this->start->setData(x_temp, y_temp);
+            start->setData(x_temp, y_temp);
             ui->plot_widget->replot();
         }
-        if (this->end->visible()) {
+        if (end->visible()) {
             QVector<double> x_temp(2), y_temp(2);
             x_temp[0] = x_temp[1] = function.getKey(end_index);
             y_temp[0] = min_y - 3;
             y_temp[1] = max_y + 3;
-            this->end->setData(x_temp, y_temp);
+            end->setData(x_temp, y_temp);
             ui->plot_widget->replot();
         }
     }

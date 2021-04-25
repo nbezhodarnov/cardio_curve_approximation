@@ -8,6 +8,7 @@
 
 #include "function.h"
 #include "functionapproximation.h"
+#include "functionapproximationtabwidget.h"
 #include "FunctionExtraction/abstractfunctionextraction.h"
 #include "FunctionApproximator/abstractfunctionapproximator.h"
 
@@ -39,6 +40,8 @@ private:
     FunctionApproximation approximation;
     AbstractFunctionExtraction *extractor;
     AbstractFunctionApproximator *approximator;
+
+    QVector<FunctionApproximationTabWidget*> results_windows;
 };
 
 #endif // MAINWINDOW_H

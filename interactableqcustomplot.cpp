@@ -57,6 +57,34 @@ void InteractableQCustomPlot::setFunction(const Function &function_input) {
     ui->plot_widget->replot();
 }
 
+void InteractableQCustomPlot::plotFunction(const Function &data, const QPen &pen) {
+    if (data == Function()) {
+        return;
+    }
+
+    double max = -INFINITY, min = INFINITY;
+    for (unsigned int i = 0; i < data.size(); i++) {
+        if (max < data.getValue(i)) {
+            max = data.getValue(i);
+        }
+        if (min > data.getValue(i)) {
+            min = data.getValue(i);
+        }
+    }
+
+    if (max > max_y) {
+        max_y = max;
+    }
+    if (min < min_y) {
+        min_y = min;
+    }
+
+    ui->plot_widget->addGraph();
+    ui->plot_widget->graph(ui->plot_widget->graphCount() - 1)->setPen(pen);
+    ui->plot_widget->graph(ui->plot_widget->graphCount() - 1)->setData(data);
+    ui->plot_widget->replot();
+}
+
 double InteractableQCustomPlot::getMinimum() {
     return min_y;
 }

@@ -10,12 +10,13 @@ public:
     FunctionApproximation(const QVector<double>&);
     void set(const double&, const double&, const double&, const double&, const double&, const double&, const double &constant = 0);
     void set(const QVector<double>&);
-    QVector<double> getCoefficients();
-    double getValue(const double&);
-    double getFirstComponentValue(const double&);
-    double getSecondComponentValue(const double&);
-    double getFirstDerivativeValue(const double&);
-    double getSecondDerivativeValue(const double&);
+    QVector<double> getCoefficients() const;
+    double getValue(const double&) const;
+    double getFirstComponentValue(const double&) const;
+    double getSecondComponentValue(const double&) const;
+    double getFirstDerivativeValue(const double&) const;
+    double getSecondDerivativeValue(const double&) const;
+    double getConstant() const;
 
 private:
     QVector<double> coefficients;

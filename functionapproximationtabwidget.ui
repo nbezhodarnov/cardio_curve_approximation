@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>FunctionApproximationTabWidget</class>
+ <widget class="QTabWidget" name="FunctionApproximationTabWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>TabWidget</string>
+  </property>
+  <property name="currentIndex">
+   <number>2</number>
+  </property>
+  <widget class="QWidget" name="plots_tab">
+   <attribute name="title">
+    <string>Графики</string>
+   </attribute>
+   <layout class="QVBoxLayout" name="verticalLayout" stretch="0,2,0,2,0,2">
+    <item>
+     <widget class="QLabel" name="function_label">
+      <property name="text">
+       <string>График функции и её компонент</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="InteractableQCustomPlot" name="function_plot" native="true"/>
+    </item>
+    <item>
+     <widget class="QLabel" name="dv1_label">
+      <property name="text">
+       <string>График первой производной функции</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="InteractableQCustomPlot" name="dv1_plot" native="true"/>
+    </item>
+    <item>
+     <widget class="QLabel" name="dv2_label">
+      <property name="text">
+       <string>График второй производной функции</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="InteractableQCustomPlot" name="dv2_plot" native="true"/>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="functions_table_tab">
+   <attribute name="title">
+    <string>Таблица</string>
+   </attribute>
+   <layout class="QGridLayout" name="gridLayout_2">
+    <item row="0" column="0">
+     <widget class="QTableWidget" name="function_table">
+      <property name="horizontalScrollBarPolicy">
+       <enum>Qt::ScrollBarAsNeeded</enum>
+      </property>
+      <property name="sizeAdjustPolicy">
+       <enum>QAbstractScrollArea::AdjustIgnored</enum>
+      </property>
+      <property name="columnCount">
+       <number>4</number>
+      </property>
+      <attribute name="horizontalHeaderCascadingSectionResizes">
+       <bool>false</bool>
+      </attribute>
+      <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
+       <bool>false</bool>
+      </attribute>
+      <attribute name="horizontalHeaderStretchLastSection">
+       <bool>false</bool>
+      </attribute>
+      <attribute name="verticalHeaderCascadingSectionResizes">
+       <bool>false</bool>
+      </attribute>
+      <column>
+       <property name="text">
+        <string>x</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>F(x)</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>dF(x)/dx</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>d^2F(x)/dx^2</string>
+       </property>
+      </column>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="main_info_tab">
+   <attribute name="title">
+    <string>Главное</string>
+   </attribute>
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0">
+     <widget class="QScrollArea" name="scrollArea_main">
+      <property name="horizontalScrollBarPolicy">
+       <enum>Qt::ScrollBarAlwaysOff</enum>
+      </property>
+      <property name="widgetResizable">
+       <bool>true</bool>
+      </property>
+      <widget class="QWidget" name="scrollAreaWidgetContents">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>0</y>
+         <width>376</width>
+         <height>248</height>
+        </rect>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_4">
+        <item row="0" column="0">
+         <widget class="QTextEdit" name="main_info_text_edit">
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="additional_info_tab">
+   <attribute name="title">
+    <string>Дополнение</string>
+   </attribute>
+   <layout class="QGridLayout" name="gridLayout_3">
+    <item row="0" column="0">
+     <widget class="QScrollArea" name="scrollArea_additional">
+      <property name="horizontalScrollBarPolicy">
+       <enum>Qt::ScrollBarAlwaysOff</enum>
+      </property>
+      <property name="widgetResizable">
+       <bool>true</bool>
+      </property>
+      <widget class="QWidget" name="scrollAreaWidgetContents_2">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>0</y>
+         <width>376</width>
+         <height>248</height>
+        </rect>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_5">
+        <item row="0" column="0">
+         <widget class="QTextEdit" name="additional_info_text_edit">
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>InteractableQCustomPlot</class>
+   <extends>QWidget</extends>
+   <header>interactableqcustomplot.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

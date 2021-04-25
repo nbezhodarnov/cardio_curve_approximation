@@ -44,6 +44,10 @@ MainWindow::~MainWindow()
     delete ui;
     delete extractor;
     delete approximator;
+
+    for (unsigned int i = 0; i < (unsigned int)results_windows.size(); i++) {
+        delete results_windows[i];
+    }
 }
 
 void MainWindow::on_make_plot_clicked()
@@ -87,6 +91,9 @@ void MainWindow::on_approximation_start_clicked()
 
 void MainWindow::on_results_clicked()
 {
+    results_windows.push_back(new FunctionApproximationTabWidget(nullptr, approximation));
+    results_windows[results_windows.size() - 1]->show();
+
     QVector<double> coefficients = approximation.getCoefficients();
     QMessageBox msgBox(this);
     msgBox.setWindowTitle(QString::fromUtf8("Результаты"));

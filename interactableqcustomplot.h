@@ -20,6 +20,8 @@ public:
 
     virtual void setFunction(const Function&);
 
+    virtual void plotFunction(const Function&, const QPen& = QPen(QBrush(QColor(Qt::black)), 1));
+
     double getMinimum();
 
     double getMaximum();
