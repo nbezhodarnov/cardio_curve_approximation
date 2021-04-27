@@ -47,7 +47,7 @@ double FunctionApproximation::getFirstDerivativeValue(const double &x) const {
 }
 
 double FunctionApproximation::getSecondDerivativeValue(const double &x) const {
-    return (-2 * coefficients[0] * coefficients[1]) * exp(-coefficients[1] * pow(x - coefficients[2], 2)) + (4 * coefficients[0] * pow(coefficients[1], 2)) * pow(x - coefficients[2], 2) * exp(-coefficients[1] * pow(x - coefficients[2], 2)) + (-2 * coefficients[3] * coefficients[4]) * exp(-coefficients[4] * pow(x - coefficients[5], 2)) + (4 * coefficients[3] * pow(coefficients[4], 2)) * pow(x - coefficients[5], 2) * exp(-coefficients[4] + pow(x - coefficients[5], 2));
+    return 2 * (2 * coefficients[0] * pow(coefficients[1], 2) * pow(x - coefficients[2], 2) * exp(-coefficients[1] * pow(x - coefficients[2], 2)) - coefficients[0] * coefficients[1] * exp(-coefficients[1] * pow(x - coefficients[2], 2)) + 2 * coefficients[3] * pow(coefficients[4], 2) * pow(x - coefficients[5], 2) * exp(-coefficients[4] * pow(x - coefficients[5], 2)) - coefficients[3] * coefficients[4] * exp(-coefficients[4] * pow(x - coefficients[5], 2)));
 }
 
 double FunctionApproximation::getConstant() const {

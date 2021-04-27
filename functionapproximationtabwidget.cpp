@@ -80,8 +80,8 @@ FunctionApproximationTabWidget::FunctionApproximationTabWidget(QWidget *parent, 
     double x = start;
     for (unsigned int i = 0; i < n; i++, x += step) {
         function.add({x, function_input.getValue(x)});
-        first_component.add({x, function_input.getFirstComponentValue(x)});
-        second_component.add({x, function_input.getSecondComponentValue(x)});
+        first_component.add({x, function_input.getFirstComponentValue(x) + constant});
+        second_component.add({x, function_input.getSecondComponentValue(x) + constant});
         first_derivative.add({x, function_input.getFirstDerivativeValue(x)});
         second_derivative.add({x, function_input.getSecondDerivativeValue(x)});
     }
@@ -111,25 +111,63 @@ FunctionApproximationTabWidget::FunctionApproximationTabWidget(QWidget *parent, 
         QString::fromUtf8(", c2 = ") + QString::number(coefficients[5]) +
         QString::fromUtf8("\nПервая производная:\n") +
         QString::number(-2 * coefficients[0] * coefficients[1]) +
-        QString::fromUtf8("(x-") + QString::number(coefficients[2]) + QString::fromUtf8(")exp{") +
-        QString::number(-coefficients[1]) + QString::fromUtf8("(x-") + QString::number(coefficients[2]) + QString::fromUtf8(")^2}") +
+        QString::fromUtf8("(x-") +
+        QString::number(coefficients[2]) +
+        QString::fromUtf8(")exp{") +
+        QString::number(-coefficients[1]) +
+        QString::fromUtf8("(x-") +
+        QString::number(coefficients[2]) +
+        QString::fromUtf8(")^2}") +
         QString::number(-2 * coefficients[3] * coefficients[4]) +
-        QString::fromUtf8("(x-") + QString::number(coefficients[5]) + QString::fromUtf8(")exp{") +
-        QString::number(-coefficients[4]) + QString::fromUtf8("(x-") + QString::number(coefficients[5]) +
+        QString::fromUtf8("(x-") + QString::number(coefficients[5]) +
+        QString::fromUtf8(")exp{") +
+        QString::number(-coefficients[4]) +
+        QString::fromUtf8("(x-") +
+        QString::number(coefficients[5]) +
         QString::fromUtf8(")^2}") +
         QString::fromUtf8("\nВторая производная:\n") +
-        QString::number(-2 * coefficients[0] * coefficients[1]) +
-        QString::fromUtf8("exp{") + QString::number(-coefficients[1]) +
-        QString::fromUtf8("(x-") + QString::number(coefficients[2]) + QString::fromUtf8(")^2}+") +
-        QString::number(4 * coefficients[0] * pow(coefficients[1], 2)) +
-        QString::fromUtf8("(x-") + QString::number(coefficients[2]) + QString::fromUtf8(")^(2)exp{") +
-        QString::number(-coefficients[1]) + QString::fromUtf8("(x-") + QString::number(coefficients[2]) + QString::fromUtf8(")^2}\n") +
-        QString::number(-2 * coefficients[3] * coefficients[4]) +
-        QString::fromUtf8("exp{") + QString::number(-coefficients[4]) +
-        QString::fromUtf8("(x-") + QString::number(coefficients[5]) + QString::fromUtf8(")^2}+") +
-        QString::number(4 * coefficients[3] * pow(coefficients[4], 2)) +
-        QString::fromUtf8("(x-") + QString::number(coefficients[5]) + QString::fromUtf8(")^(2)exp{") +
-        QString::number(-coefficients[4]) + QString::fromUtf8("(x-") + QString::number(coefficients[5]) + QString::fromUtf8(")^2}")
+        QString::fromUtf8("2(2*") +
+        QString::number(coefficients[0]) +
+        QString::fromUtf8("*") +
+        QString::number(coefficients[1]) +
+        QString::fromUtf8("^(2)*(x-") +
+        QString::number(coefficients[2]) +
+        QString::fromUtf8(")^(2)*") +
+        QString::fromUtf8("exp{") +
+        QString::number(-coefficients[1]) +
+        QString::fromUtf8("(x-") +
+        QString::number(coefficients[2]) +
+        QString::fromUtf8(")^2}") +
+        QString::fromUtf8("-") +
+        QString::number(coefficients[0]) +
+        QString::fromUtf8("*") +
+        QString::number(coefficients[1]) +
+        QString::fromUtf8("*exp{") +
+        QString::number(-coefficients[1]) +
+        QString::fromUtf8("(x-") +
+        QString::number(coefficients[2]) +
+        QString::fromUtf8(")^2}") +
+        QString::fromUtf8("+2*") +
+        QString::number(coefficients[3]) +
+        QString::fromUtf8("*") +
+        QString::number(coefficients[4]) +
+        QString::fromUtf8("^(2)*(x-") +
+        QString::number(coefficients[5]) +
+        QString::fromUtf8(")^(2)*") +
+        QString::fromUtf8("exp{") +
+        QString::number(-coefficients[4]) +
+        QString::fromUtf8("(x-") +
+        QString::number(coefficients[5]) +
+        QString::fromUtf8(")^2}") +
+        QString::fromUtf8("-") +
+        QString::number(coefficients[3]) +
+        QString::fromUtf8("*") +
+        QString::number(coefficients[4]) +
+        QString::fromUtf8("*exp{") +
+        QString::number(-coefficients[4]) +
+        QString::fromUtf8("(x-") +
+        QString::number(coefficients[5]) +
+        QString::fromUtf8(")^2})")
     );
 
     double peak_time_1 = 0, peak_time_2 = 0;
