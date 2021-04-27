@@ -61,7 +61,7 @@ double findIntegral(const std::function<double (const double&)> &function, const
     return integral;
 }
 
-#define PRECISION 0.01
+#define PRECISION 0.001
 
 FunctionApproximationTabWidget::FunctionApproximationTabWidget(QWidget *parent, const FunctionApproximation &function_input) :
     QTabWidget(parent),
@@ -172,18 +172,19 @@ FunctionApproximationTabWidget::FunctionApproximationTabWidget(QWidget *parent, 
 
     double peak_time_1 = 0, peak_time_2 = 0;
     peak_time_1 = findMaximum([&function_input](const double &key){return function_input.getValue(key);}, PRECISION, coefficients[2]);
+    peak_time_2 = findMaximum([&function_input](const double &key){return function_input.getValue(key);}, PRECISION, coefficients[5]);
     double first_peak_maximum = function_input.getValue(peak_time_1), second_peak_maximim = -INFINITY;
 
     double amplitude = first_peak_maximum - constant;
     double amplitude_2 = first_peak_maximum - constant;
 
-    double time_up_50_percent = findKeyByValue([&function_input](const double &key) {return function_input.getValue(key);}, first_peak_maximum - amplitude / 2.0, PRECISION, start);
+    double time_up_50_percent = -INFINITY;
     double time_down_50_percent = -INFINITY;
 
-    double time_up_90_percent = findKeyByValue([&function_input](const double &key) {return function_input.getValue(key);}, first_peak_maximum - amplitude / 10.0, PRECISION, start);
+    double time_up_90_percent = -INFINITY;
     double time_down_90_percent = -INFINITY;
 
-    double time_up_10_percent = findKeyByValue([&function_input](const double &key) {return function_input.getValue(key);}, first_peak_maximum - 9.0 * amplitude / 10.0, PRECISION, start);
+    double time_up_10_percent = -INFINITY;
     double time_down_10_percent = -INFINITY;
 
     QString additional_info_text = "";
@@ -193,8 +194,7 @@ FunctionApproximationTabWidget::FunctionApproximationTabWidget(QWidget *parent, 
         QString::fromUtf8("\nЗначение в первом пике: ") +
         QString::number(first_peak_maximum) + '\n';
 
-    if (abs(coefficients[5] - coefficients[2]) > 1) {
-        peak_time_2 = findMaximum([&function_input](const double &key){return function_input.getValue(key);}, PRECISION, coefficients[5]);
+    if (abs(peak_time_2 - peak_time_1) > PRECISION * 50) {
         second_peak_maximim = function_input.getValue(peak_time_2);
         additional_info_text +=
             QString::fromUtf8("Момент второго пика: ") +
@@ -206,10 +206,22 @@ FunctionApproximationTabWidget::FunctionApproximationTabWidget(QWidget *parent, 
         time_down_90_percent = findKeyByValue([&function_input](const double &key) {return function_input.getValue(key);}, second_peak_maximim - amplitude_2 / 10.0, PRECISION, end);
         time_down_10_percent = findKeyByValue([&function_input](const double &key) {return function_input.getValue(key);}, second_peak_maximim - 9.0 * amplitude_2 / 10.0, PRECISION, end);
     } else {
+        if (first_peak_maximum < second_peak_maximim) {
+            peak_time_1 = peak_time_2;
+            first_peak_maximum = second_peak_maximim;
+            amplitude = first_peak_maximum - constant;
+            amplitude_2 = first_peak_maximum - constant;
+        }
         time_down_50_percent = findKeyByValue([&function_input](const double &key) {return function_input.getValue(key);}, first_peak_maximum - amplitude / 2.0, PRECISION, end);
         time_down_90_percent = findKeyByValue([&function_input](const double &key) {return function_input.getValue(key);}, first_peak_maximum - amplitude / 10.0, PRECISION, end);
         time_down_10_percent = findKeyByValue([&function_input](const double &key) {return function_input.getValue(key);}, first_peak_maximum - 9.0 * amplitude / 10.0, PRECISION, end);
     }
+
+    time_up_50_percent = findKeyByValue([&function_input](const double &key) {return function_input.getValue(key);}, first_peak_maximum - amplitude / 2.0, PRECISION, start);
+
+    time_up_90_percent = findKeyByValue([&function_input](const double &key) {return function_input.getValue(key);}, first_peak_maximum - amplitude / 10.0, PRECISION, start);
+
+    time_up_10_percent = findKeyByValue([&function_input](const double &key) {return function_input.getValue(key);}, first_peak_maximum - 9.0 * amplitude / 10.0, PRECISION, start);
 
     additional_info_text +=
         QString::fromUtf8("Значение во время простоя: ") +
