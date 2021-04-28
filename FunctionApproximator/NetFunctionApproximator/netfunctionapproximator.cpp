@@ -156,7 +156,7 @@ FunctionApproximation NetFunctionApproximator::approximate(const Function &funct
         out << '\n';
     }
 
-    double step1 = 0.5, step2 = 0.01, step3 = 0.1, min_value = INFINITY, previous_value, temp;
+    double step1 = 0.5, step2 = 0.01, step3 = 0.1, min_value = INFINITY, previous_value, temp, temp2;
     if ((a1 > 1000) || (a2 > 1000)) {
         step1 = 2;
         step3 = 0.05;
@@ -353,17 +353,39 @@ FunctionApproximation NetFunctionApproximator::approximate(const Function &funct
             for (unsigned int p = 0; p < numbers_of_points; ++p) {
                 center_correcter = 0;
                 if ((p > n * 0.25) && (p < n * 0.75)) {
-                    center_correcter = 1;
+                    center_correcter = 2;
                 }
                 if ((peakLine1.isIndexOutOfLine(p * n / numbers_of_points)) && (peakLine2.isIndexOutOfLine(p * n / numbers_of_points))) {
                     temp += center_correcter * std::abs(funcTemp.getValue(p * n / numbers_of_points) - std::abs(a1) * exp(-std::abs(b1) * pow(funcTemp.getKey(p * n / numbers_of_points) - c1, 2)) - std::abs(a2) * exp(-std::abs(b2) * pow(funcTemp.getKey(p * n / numbers_of_points) - c2, 2)));
                 }
             }
-            if ((min_value < 21 * step) && (temp > 13 * step)) {
+            if ((min_value < 21 * step) && (temp > 8 * step)) {
                 need_center_correction = true;
                 min_value = INFINITY;
             }
         }
+        center_correcter = 1;
+        temp = 0;
+        temp2 = 0;
+
+        for (unsigned int p = 0; p < numbers_of_points; ++p) {
+            temp += center_correcter * std::abs(funcTemp.getValue(p * n / numbers_of_points) - std::abs(a1) * exp(-std::abs(b1) * pow(funcTemp.getKey(p * n / numbers_of_points) - c1, 2)));
+            temp2 += center_correcter * std::abs(funcTemp.getValue(p * n / numbers_of_points) - std::abs(a2) * exp(-std::abs(b2) * pow(funcTemp.getKey(p * n / numbers_of_points) - c2, 2)));
+        }
+        if (abs(std::max(temp, temp2) - min_value) <= 5 * step) {
+            if (temp == std::min(temp, temp2)) {
+                a1 = a2 / 2.0;
+                b1 = b2;
+                c1 = c2;
+                a2 = a1;
+            } else {
+                a2 = a1 / 2.0;
+                b2 = b1;
+                c2 = c1;
+                a1 = a2;
+            }
+        }
+
         out << "a1 = " << a1 << ", b1 = " << b1 << ", c1 = " << c1 << '\n' << flush;
         out << "a2 = " << a2 << ", b2 = " << b2 << ", c2 = " << c2 << '\n' << flush;
         out << min_value << ' ' << previous_value << '\n' << flush;
