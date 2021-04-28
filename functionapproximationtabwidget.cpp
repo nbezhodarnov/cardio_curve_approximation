@@ -6,7 +6,7 @@ double findKeyByValue(const std::function<double (const double&)> &function, con
     double step = 1;
     double step_left_value = INFINITY, in_key_value = INFINITY, step_right_value = INFINITY;
     double min = INFINITY;
-    while (abs(function(key) - value) > precision) {
+    while (abs(function(key) - value) > precision / 100.0) {
         step_left_value = abs(function(key - step) - value);
         in_key_value = abs(function(key) - value);
         step_right_value = abs(function(key + step) - value);
@@ -28,7 +28,7 @@ double findMaximum(const std::function<double (const double&)> &function, const 
     double step_left_value = -INFINITY, in_key_value = -INFINITY, step_right_value = -INFINITY;
     double max_difference = INFINITY;
     double max = -INFINITY;
-    while (max_difference > precision) {
+    while (max_difference > precision / 100.0) {
         step_left_value = function(key - step);
         in_key_value = function(key);
         step_right_value = function(key + step);
@@ -47,7 +47,7 @@ double findMaximum(const std::function<double (const double&)> &function, const 
 
 double findIntegral(const std::function<double (const double&)> &function, const double &start, const double &end, const double &precision) {
         double previous_integral = precision + 1, integral = 0;
-        for (int N = 2; (N <= 4) || (abs(integral - previous_integral) > precision); N *= 2) {
+        for (int N = 2; (N <= 4) || (abs(integral - previous_integral) > precision / 100.0); N *= 2) {
             double step, sum2 = 0, sum4 = 0, sum = 0;
             step = (end - start) / (2 * N);
             for (int i = 1; i <= 2 * N - 1; i += 2) {
