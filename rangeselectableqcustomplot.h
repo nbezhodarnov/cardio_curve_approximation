@@ -32,7 +32,7 @@ private slots:
     void mouseReleaseEvent(QMouseEvent *event);
 
 private:
-    QCPCurve *verticalLine, *start, *end;
+    QCPGraph *verticalLine, *start, *end;
     bool end_turn;
     double xAxis[2], yAxis[2];
     unsigned int start_index, end_index;

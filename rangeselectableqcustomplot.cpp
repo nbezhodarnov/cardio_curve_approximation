@@ -9,8 +9,9 @@ RangeSelectableQCustomPlot::RangeSelectableQCustomPlot(QWidget *parent) :
     end = nullptr;
     end_index = 0;
     end_turn = false;
-    verticalLine = new QCPCurve(ui->plot_widget->xAxis, ui->plot_widget->yAxis);
-    ui->plot_widget->addPlottable(verticalLine);
+    //verticalLine = new QCPCurve(ui->plot_widget->xAxis, ui->plot_widget->yAxis);
+    ui->plot_widget->addGraph();
+    verticalLine = ui->plot_widget->graph(ui->plot_widget->graphCount() - 1);
     verticalLine->setName("Vertical");
     verticalLine->setPen(QPen(QBrush(QColor(Qt::black)), 1));
 }
@@ -23,9 +24,10 @@ void RangeSelectableQCustomPlot::setFunction(const Function &function_input) {
 
     InteractableQCustomPlot::setFunction(function_input);
 
-    delete verticalLine;
-    verticalLine = new QCPCurve(ui->plot_widget->xAxis, ui->plot_widget->yAxis);
-    ui->plot_widget->addPlottable(verticalLine);
+    //delete verticalLine;
+    //verticalLine = new QCPCurve(ui->plot_widget->xAxis, ui->plot_widget->yAxis);
+    ui->plot_widget->addGraph();
+    verticalLine = ui->plot_widget->graph(ui->plot_widget->graphCount() - 1);
     verticalLine->setName("Vertical");
     verticalLine->setPen(QPen(QBrush(QColor(Qt::black)), 1));
 }
@@ -43,6 +45,7 @@ void RangeSelectableQCustomPlot::plotFunction(const Function &data, const QPen &
         return;
     }
 
+    QVector<double> x, y;
     double max = -INFINITY, min = INFINITY;
     for (unsigned int i = 0; i < data.size(); i++) {
         if (max < data.getValue(i)) {
@@ -51,6 +54,8 @@ void RangeSelectableQCustomPlot::plotFunction(const Function &data, const QPen &
         if (min > data.getValue(i)) {
             min = data.getValue(i);
         }
+        x.push_back(data.getKey(i));
+        y.push_back(data.getValue(i));
     }
 
     bool max_min_changed = false;
@@ -83,7 +88,7 @@ void RangeSelectableQCustomPlot::plotFunction(const Function &data, const QPen &
 
     ui->plot_widget->addGraph();
     ui->plot_widget->graph(ui->plot_widget->graphCount() - 1)->setPen(pen);
-    ui->plot_widget->graph(ui->plot_widget->graphCount() - 1)->setData(data);
+    ui->plot_widget->graph(ui->plot_widget->graphCount() - 1)->setData(x, y);
     ui->plot_widget->replot();
 }
 
@@ -175,8 +180,9 @@ void RangeSelectableQCustomPlot::mouseClickEvent(QMouseEvent *event)
     y[1] = yend;
 
     if (start == nullptr) {
-        start = new QCPCurve(ui->plot_widget->xAxis, ui->plot_widget->yAxis);
-        ui->plot_widget->addPlottable(start);
+        //start = new QCPCurve(ui->plot_widget->xAxis, ui->plot_widget->yAxis);
+        ui->plot_widget->addGraph();
+        start = ui->plot_widget->graph(ui->plot_widget->graphCount() - 1);
         start->setName("Start");
         start->setPen(QPen(QBrush(QColor(Qt::red)), 1));
         start->setData(x, y);
@@ -185,8 +191,9 @@ void RangeSelectableQCustomPlot::mouseClickEvent(QMouseEvent *event)
         ui->plot_widget->replot();
         return;
     } else if (end == nullptr) {
-        end = new QCPCurve(ui->plot_widget->xAxis, ui->plot_widget->yAxis);
-        ui->plot_widget->addPlottable(end);
+        //end = new QCPCurve(ui->plot_widget->xAxis, ui->plot_widget->yAxis);
+        ui->plot_widget->addGraph();
+        end = ui->plot_widget->graph(ui->plot_widget->graphCount() - 1);
         end->setName("End");
         end->setPen(QPen(QBrush(QColor(Qt::red)), 1));
         end->setData(x, y);

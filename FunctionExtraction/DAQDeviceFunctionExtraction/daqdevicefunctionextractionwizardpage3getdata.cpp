@@ -91,7 +91,7 @@ void DAQDeviceFunctionExtractionWizardPage3GetData::PrintData()
     if ((ptr != nullptr) && (data != nullptr)) {
         QList<FunctionElement>::iterator dataIterator = temp.begin();
         for (unsigned int i = 0; (dataIterator != temp.end()) && (i < (unsigned int)(ptr->getFrequency() * 0.025)); dataIterator = temp.erase(dataIterator), i++) {
-            ui->plotBuilder->graph(0)->addData(*dataIterator);
+            ui->plotBuilder->graph(0)->addData(dataIterator->x, dataIterator->f);
             if (dataIterator->x > 1) {
                 ui->plotBuilder->xAxis->setRange(dataIterator->x - 1, dataIterator->x);
                 ui->plotBuilder->replot();
