@@ -113,6 +113,25 @@
         </property>
        </widget>
       </item>
+      <item>
+       <widget class="QPushButton" name="save_results_to_file">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>Сохранить результаты
+в файл</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="open_results_from_file">
+        <property name="text">
+         <string>Открыть результаты
+из файла</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
    </layout>

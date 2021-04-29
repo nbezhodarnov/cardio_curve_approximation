@@ -35,6 +35,10 @@ private slots:
 
     void on_extractor_choose_currentIndexChanged(int index);
 
+    void on_save_results_to_file_clicked();
+
+    void on_open_results_from_file_clicked();
+
 private:
     Ui::MainWindow *ui;
     FunctionApproximation approximation;
