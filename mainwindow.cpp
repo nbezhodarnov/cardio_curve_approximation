@@ -232,7 +232,7 @@ void MainWindow::on_save_results_to_file_clicked()
         QString::fromUtf8("\nЗначение в первом пике: ") +
         QString::number(first_peak_maximum) + '\n';
 
-    if (abs(peak_time_2 - peak_time_1) > PRECISION * 50) {
+    if (std::abs(peak_time_2 - peak_time_1) > PRECISION * 50) {
         second_peak_maximim = approximation.getValue(peak_time_2);
         additional_info_text +=
             QString::fromUtf8("Момент второго пика: ") +

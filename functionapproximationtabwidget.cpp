@@ -6,10 +6,10 @@ double findKeyByValue(const std::function<double (const double&)> &function, con
     double step = 1;
     double step_left_value = INFINITY, in_key_value = INFINITY, step_right_value = INFINITY;
     double min = INFINITY;
-    while (abs(function(key) - value) > precision / 100.0) {
-        step_left_value = abs(function(key - step) - value);
-        in_key_value = abs(function(key) - value);
-        step_right_value = abs(function(key + step) - value);
+    while (std::abs(function(key) - value) > precision / 100.0) {
+        step_left_value = std::abs(function(key - step) - value);
+        in_key_value = std::abs(function(key) - value);
+        step_right_value = std::abs(function(key + step) - value);
         min = std::min({step_left_value, in_key_value, step_right_value});
         if (min == step_left_value) {
             key -= step;
@@ -47,7 +47,7 @@ double findMaximum(const std::function<double (const double&)> &function, const 
 
 double findIntegral(const std::function<double (const double&)> &function, const double &start, const double &end, const double &precision) {
         double previous_integral = precision + 1, integral = 0;
-        for (int N = 2; (N <= 4) || (abs(integral - previous_integral) > precision / 100.0); N *= 2) {
+        for (int N = 2; (N <= 4) || (std::abs(integral - previous_integral) > precision / 100.0); N *= 2) {
             double step, sum2 = 0, sum4 = 0, sum = 0;
             step = (end - start) / (2 * N);
             for (int i = 1; i <= 2 * N - 1; i += 2) {
@@ -194,7 +194,7 @@ FunctionApproximationTabWidget::FunctionApproximationTabWidget(QWidget *parent, 
         QString::fromUtf8("\nЗначение в первом пике: ") +
         QString::number(first_peak_maximum) + '\n';
 
-    if (abs(peak_time_2 - peak_time_1) > PRECISION * 50) {
+    if (std::abs(peak_time_2 - peak_time_1) > PRECISION * 50) {
         second_peak_maximim = function_input.getValue(peak_time_2);
         additional_info_text +=
             QString::fromUtf8("Момент второго пика: ") +
