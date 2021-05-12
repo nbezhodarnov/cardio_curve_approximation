@@ -46,7 +46,7 @@ Function FileFunctionExtractionManager::extract() {
     QFile file;
     qint64 ret = QMessageBox::Yes;
     while (ret == QMessageBox::Yes) {
-        QString file_name = QFileDialog::getOpenFileName(parent, QString::fromUtf8("Открыть файл"), "", QString::fromUtf8("Файлы ndat (*.ndat);;Файлы dat (*.dat);;Все файлы (*)"));
+        QString file_name = QFileDialog::getOpenFileName(parent, QString::fromUtf8("Открыть файл"), "", QString::fromUtf8("Файлы ndat (*.ndat);;Все файлы (*)"));
         if (file_name == "") {
             QTextStream(stdout) << "No file has been opened.\n" << flush;
             return Function();
