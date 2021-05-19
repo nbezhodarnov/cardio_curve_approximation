@@ -5,6 +5,7 @@
 #include <QWizardPage>
 
 #include "FunctionExtraction/DAQDeviceFunctionExtraction/daqdevicefunctionextraction.h"
+#include "qcustomplot.h"
 
 namespace Ui {
 class DAQDeviceFunctionExtractionWizardPage3GetData;
@@ -41,6 +42,7 @@ private:
     QList<FunctionElement> temp;
     QTimer getDataTimer;
     QTimer printDataTimer;
+    QSharedPointer<QCPGraphDataContainer> print_plot;
 };
 
 #endif // DAQDEVICEFUNCTIONEXTRACTIONWIZARDPAGE3GETDATA_H
