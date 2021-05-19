@@ -46,7 +46,8 @@ BOOL CALLBACK AddRangeList(UINT cap, DBL max, DBL min, LPARAM lParam) {
     char str[STR_LENGTH];
     //sprintf(str, RANGE_FORMAT, min, max);
     sprintf(str, RANGE2_FORMAT, min, max);
-    ((QStringList*)lParam)->append(str);
+    ((QStringList*)lParam)->insert(0, str);
+    //((QStringList*)lParam)->append(str);
     return true;
 }
 
