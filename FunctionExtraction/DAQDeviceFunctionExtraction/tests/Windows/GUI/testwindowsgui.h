@@ -4,6 +4,7 @@
 #include "FunctionExtraction/DAQDeviceFunctionExtraction/olmem.h"
 
 #include <windows.h>
+#include <math.h>
 #include <vector>
 #include <QTimer>
 
