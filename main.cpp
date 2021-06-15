@@ -10,9 +10,9 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     QString translatorName = "qt_";
-    translatorName += QLocale::system().name();
+    translatorName += "ru"; // QLocale::system().name()
     QTranslator translator;
-    if (translator.load(translatorName, QLibraryInfo::location(QLibraryInfo::TranslationsPath))) {
+    if (translator.load(translatorName, "translations/")) { // QLibraryInfo::location(QLibraryInfo::TranslationsPath)
         a.installTranslator(&translator);
     }
     MainWindow w;
