@@ -11,6 +11,12 @@ public:
     Function();
     void add(FunctionElement);
     void add(double, double);
+    void move(double, double);
+    void moveByAxisX(double);
+    void moveByAxisY(double);
+    void removeElementAt(unsigned int);
+    void removeElementsFromBeginning(unsigned int);
+    void removeElementsFromEnd(unsigned int);
     FunctionElement getElement(unsigned int) const;
     FunctionElement getElement(int) const;
     double getKey(unsigned int) const;

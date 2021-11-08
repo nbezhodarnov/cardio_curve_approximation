@@ -13,6 +13,36 @@ void Function::add(double x, double f) {
     elements.append({x, f});
 }
 
+
+void Function::move(double x, double y) {
+    for (unsigned int i = 0; i < (unsigned int)elements.size(); i++) {
+        elements[i] = {elements[i].x + x, elements[i].f + y};
+    }
+}
+
+void Function::moveByAxisX(double x) {
+    move(x, 0);
+}
+
+void Function::moveByAxisY(double y) {
+    move(0, y);
+}
+
+
+void Function::removeElementAt(unsigned int i) {
+    elements.removeAt(i);
+}
+
+
+void Function::removeElementsFromBeginning(unsigned int count) {
+    elements.remove(0, count);
+}
+
+
+void Function::removeElementsFromEnd(unsigned int count) {
+    elements.remove(elements.size() - 1, count);
+}
+
 FunctionElement Function::getElement(unsigned int i) const {
     if (i < (unsigned int)elements.size()) {
         return elements[i];

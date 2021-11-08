@@ -3,10 +3,10 @@
 
 double findKeyByValue(const std::function<double (const double&)> &function, const double &value, const double &precision, const double &start) {
     double key = start;
-    double step = 1;
+    double step = 0.1;
     double step_left_value = INFINITY, in_key_value = INFINITY, step_right_value = INFINITY;
     double min = INFINITY;
-    while (std::abs(function(key) - value) > precision / 100.0) {
+    while (std::abs(function(key) - value) > precision) {
         step_left_value = std::abs(function(key - step) - value);
         in_key_value = std::abs(function(key) - value);
         step_right_value = std::abs(function(key + step) - value);
@@ -24,11 +24,11 @@ double findKeyByValue(const std::function<double (const double&)> &function, con
 
 double findMaximum(const std::function<double (const double&)> &function, const double &precision, const double &start) {
     double key = start;
-    double step = 1;
+    double step = 0.1;
     double step_left_value = -INFINITY, in_key_value = -INFINITY, step_right_value = -INFINITY;
     double max_difference = INFINITY;
     double max = -INFINITY;
-    while (max_difference > precision / 100.0) {
+    while (max_difference > precision) {
         step_left_value = function(key - step);
         in_key_value = function(key);
         step_right_value = function(key + step);
@@ -47,7 +47,7 @@ double findMaximum(const std::function<double (const double&)> &function, const 
 
 double findIntegral(const std::function<double (const double&)> &function, const double &start, const double &end, const double &precision) {
         double previous_integral = precision + 1, integral = 0;
-        for (int N = 2; (N <= 4) || (std::abs(integral - previous_integral) > precision / 100.0); N *= 2) {
+        for (int N = 2; (N <= 4) || (std::abs(integral - previous_integral) > precision); N *= 2) {
             double step, sum2 = 0, sum4 = 0, sum = 0;
             step = (end - start) / (2 * N);
             for (int i = 1; i <= 2 * N - 1; i += 2) {
@@ -70,9 +70,16 @@ FunctionApproximationTabWidget::FunctionApproximationTabWidget(QWidget *parent, 
     ui->setupUi(this);
 
     QVector<double> coefficients = function_input.getCoefficients();
+    bool are_two_peaks = true;
+    if (coefficients[3] == 0) {
+        are_two_peaks = false;
+    }
     double constant = function_input.getConstant();
     double start = findKeyByValue([&function_input](const double &key) {return function_input.getValue(key);}, constant, PRECISION, coefficients[2]);
     double end = findKeyByValue([&function_input](const double &key) {return function_input.getValue(key);}, constant, PRECISION, coefficients[5]);
+    if (!are_two_peaks) {
+        end = findKeyByValue([&function_input](const double &key) {return function_input.getValue(key);}, constant, PRECISION, coefficients[2] + 0.5);
+    }
 
     Function function, first_component, second_component, first_derivative, second_derivative;
     const unsigned int n = 200;
@@ -173,6 +180,12 @@ FunctionApproximationTabWidget::FunctionApproximationTabWidget(QWidget *parent, 
     double peak_time_1 = 0, peak_time_2 = 0;
     peak_time_1 = findMaximum([&function_input](const double &key){return function_input.getValue(key);}, PRECISION, coefficients[2]);
     peak_time_2 = findMaximum([&function_input](const double &key){return function_input.getValue(key);}, PRECISION, coefficients[5]);
+    if (are_two_peaks && std::abs(peak_time_2 - peak_time_1) < PRECISION * 50) {
+        are_two_peaks = false;
+        peak_time_2 = peak_time_1;
+    } else if (!are_two_peaks) {
+        peak_time_2 = peak_time_1;
+    }
     double first_peak_maximum = function_input.getValue(peak_time_1), second_peak_maximim = -INFINITY;
 
     double amplitude = first_peak_maximum - constant;
@@ -194,7 +207,7 @@ FunctionApproximationTabWidget::FunctionApproximationTabWidget(QWidget *parent, 
         QString::fromUtf8("\nЗначение в первом пике: ") +
         QString::number(first_peak_maximum) + '\n';
 
-    if (std::abs(peak_time_2 - peak_time_1) > PRECISION * 50) {
+    if (are_two_peaks) {
         second_peak_maximim = function_input.getValue(peak_time_2);
         additional_info_text +=
             QString::fromUtf8("Момент второго пика: ") +
@@ -217,11 +230,11 @@ FunctionApproximationTabWidget::FunctionApproximationTabWidget(QWidget *parent, 
         time_down_10_percent = findKeyByValue([&function_input](const double &key) {return function_input.getValue(key);}, first_peak_maximum - 9.0 * amplitude / 10.0, PRECISION, end);
     }
 
-    time_up_50_percent = findKeyByValue([&function_input](const double &key) {return function_input.getValue(key);}, first_peak_maximum - amplitude / 2.0, PRECISION, start);
+    time_up_50_percent = findKeyByValue([&function_input](const double &key) {return function_input.getValue(key);}, first_peak_maximum - amplitude / 2.0, PRECISION, coefficients[2]);
 
-    time_up_90_percent = findKeyByValue([&function_input](const double &key) {return function_input.getValue(key);}, first_peak_maximum - amplitude / 10.0, PRECISION, start);
+    time_up_90_percent = findKeyByValue([&function_input](const double &key) {return function_input.getValue(key);}, first_peak_maximum - amplitude / 10.0, PRECISION, coefficients[2]);
 
-    time_up_10_percent = findKeyByValue([&function_input](const double &key) {return function_input.getValue(key);}, first_peak_maximum - 9.0 * amplitude / 10.0, PRECISION, start);
+    time_up_10_percent = findKeyByValue([&function_input](const double &key) {return function_input.getValue(key);}, first_peak_maximum - 9.0 * amplitude / 10.0, PRECISION, coefficients[2]);
 
     additional_info_text +=
         QString::fromUtf8("Значение во время простоя: ") +
