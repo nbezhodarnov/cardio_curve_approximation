@@ -293,11 +293,11 @@ void MainWindow::on_save_results_to_file_clicked()
         time_down_10_percent = findKeyByValue([this](const double &key) {return approximation.getValue(key);}, first_peak_maximum - 9.0 * amplitude / 10.0, PRECISION, end);
     }
 
-    time_up_50_percent = findKeyByValue([this](const double &key) {return approximation.getValue(key);}, first_peak_maximum - amplitude / 2.0, PRECISION, coefficients[2]);
+    time_up_50_percent = findKeyByValue([this](const double &key) {return approximation.getValue(key);}, first_peak_maximum - amplitude / 2.0, PRECISION, start);
 
-    time_up_90_percent = findKeyByValue([this](const double &key) {return approximation.getValue(key);}, first_peak_maximum - amplitude / 10.0, PRECISION, coefficients[2]);
+    time_up_90_percent = findKeyByValue([this](const double &key) {return approximation.getValue(key);}, first_peak_maximum - amplitude / 10.0, PRECISION, start);
 
-    time_up_10_percent = findKeyByValue([this](const double &key) {return approximation.getValue(key);}, first_peak_maximum - 9.0 * amplitude / 10.0, PRECISION, coefficients[2]);
+    time_up_10_percent = findKeyByValue([this](const double &key) {return approximation.getValue(key);}, first_peak_maximum - 9.0 * amplitude / 10.0, PRECISION, start);
 
     additional_info_text +=
             QString::fromUtf8("Значение во время простоя: ") +

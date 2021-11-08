@@ -63,7 +63,7 @@ FunctionApproximation NetFunctionApproximator::approximate(const Function &funct
     b2 = std::abs(-log(normalized_function.getValue(index + (points_count - index) / 2) / a2) / (pow(normalized_function.getKey(index + (points_count - index) / 2) - c2, 2)));
 
     bool are_two_extremums = true;
-    if (std::abs(c1 - c2) <= 5 * step) {
+    if (std::abs(c1 - c2) <= 25 * step) {
         are_two_extremums = false;
     }
 
@@ -71,7 +71,11 @@ FunctionApproximation NetFunctionApproximator::approximate(const Function &funct
     if (are_two_extremums) {
         out << "a2 = " << a2 << ", b2 = " << b2 << ", c2 = " << c2 << "\n\n" << flush;
     } else {
-        a2 = b2 = c2 = 0;
+        //a2 = b2 = c2 = 0;
+        a1 /= 2;
+        a2 = a1;
+        b2 = b1;
+        //c2 = c1;
         out << '\n';
     }
 
@@ -108,23 +112,23 @@ FunctionApproximation NetFunctionApproximator::approximate(const Function &funct
     }
 
     long double approximating_function = 0;
-    uint8_t little_changes_count = 0;
+    uint8_t little_changes_count = 0, max_little_changes = 50, decrease_net_step = max_little_changes / 10;
     double min_difference = INFINITY, previous_difference = 0, difference = 0;
     while (min_difference > step) {
-        if (c1 < function.getKey(0) - 1000 * step || c1 > function.getKey(points_count - 1) + 1000 * step) {
+        if (c1 < normalized_function.getKey(0) - 1000 * step || c1 > normalized_function.getKey(points_count - 1) + 1000 * step) {
             a1 = b1 = c1 = 0;
         }
-        if (c2 < function.getKey(0) - 1000 * step || c2 > function.getKey(points_count - 1) + 1000 * step) {
+        if (c2 < normalized_function.getKey(0) - 1000 * step || c2 > normalized_function.getKey(points_count - 1) + 1000 * step) {
             a2 = b2 = c2 = 0;
         }
         if (std::abs(previous_difference - min_difference) < step) {
             little_changes_count++;
-            if (little_changes_count % 10 == 0) {
+            if (little_changes_count % decrease_net_step == 0) {
                 step1 /= 10;
                 step2 /= 10;
                 step3 /= 10;
             }
-            if (little_changes_count > 100) {
+            if (little_changes_count > max_little_changes) {
                 break;
             }
         } else {
@@ -142,19 +146,21 @@ FunctionApproximation NetFunctionApproximator::approximate(const Function &funct
                         for (uint8_t x5 = 0; x5 < net_step; ++x5) {
                             for (uint8_t x6 = 0; x6 < net_step; ++x6) {
                                 QApplication::processEvents();
-                                difference = 0;
-                                for (unsigned int i = 0; i < points_count; ++i) {
-                                    approximating_function = std::abs(a1 - (net_step_center - x1) * step1) * exp(-std::abs(b1 - (net_step_center - x2) * step2) * pow(normalized_function.getKey(i) - c1 + (net_step_center - x3) * step3, 2)) - std::abs(a2 - (net_step_center - x4) * step1) * exp(-std::abs(b2 - (net_step_center - x5) * step2) * pow(normalized_function.getKey(i) - c2 + (net_step_center - x6) * step3, 2));
-                                    difference += std::abs(normalized_function.getValue(i) - approximating_function);
-                                }
-                                if (difference < min_difference) {
-                                    min_difference = difference;
-                                    min_point_indexes[0] = x1;
-                                    min_point_indexes[1] = x2;
-                                    min_point_indexes[2] = x3;
-                                    min_point_indexes[3] = x4;
-                                    min_point_indexes[4] = x5;
-                                    min_point_indexes[5] = x6;
+                                if (((c1 + (net_step_center - x3) * step3) > normalized_function.getKey(0)) && ((c1 + (net_step_center - x3) * step3) < normalized_function.getKey(points_count - 1)) && ((c2 + (net_step_center - x6) * step3) > normalized_function.getKey(0)) && ((c2 + (net_step_center - x6) * step3) < normalized_function.getKey(points_count - 1))) {
+                                    difference = 0;
+                                    for (unsigned int i = 0; i < points_count; ++i) {
+                                        approximating_function = std::abs(a1 - (net_step_center - x1) * step1) * exp(-std::abs(b1 - (net_step_center - x2) * step2) * pow(normalized_function.getKey(i) - c1 + (net_step_center - x3) * step3, 2)) + std::abs(a2 - (net_step_center - x4) * step1) * exp(-std::abs(b2 - (net_step_center - x5) * step2) * pow(normalized_function.getKey(i) - c2 + (net_step_center - x6) * step3, 2));
+                                        difference += std::abs(normalized_function.getValue(i) - approximating_function);
+                                    }
+                                    if (difference < min_difference) {
+                                        min_difference = difference;
+                                        min_point_indexes[0] = x1;
+                                        min_point_indexes[1] = x2;
+                                        min_point_indexes[2] = x3;
+                                        min_point_indexes[3] = x4;
+                                        min_point_indexes[4] = x5;
+                                        min_point_indexes[5] = x6;
+                                    }
                                 }
                             }
                         }
@@ -188,6 +194,10 @@ FunctionApproximation NetFunctionApproximator::approximate(const Function &funct
 
     if (c2 < function.getKey(0) - 100 * step || c2 > function.getKey(points_count - 1) + 100 * step) {
         a2 = b2 = c2 = 0;
+    } else if (c1 > c2) {
+        std::swap(a1, a2);
+        std::swap(b1, b2);
+        std::swap(c1, c2);
     }
 
     out << "a1 = " << a1 << ", b1 = " << b1 << ", c1 = " << c1 << '\n' << flush;
