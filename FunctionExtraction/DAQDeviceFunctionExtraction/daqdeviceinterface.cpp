@@ -241,7 +241,6 @@ bool DAQDeviceInterface::start() {
         DisplayErrorMessage("Ошибка запуска чтения данных!");
         return false;
     }
-    x = 0;
     return true;
 }
 

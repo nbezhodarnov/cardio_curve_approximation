@@ -52,7 +52,7 @@ private:
     Range rangeBoard;
     double frequency;
     double gainBoard;
-    double x;
+    double x = 0;
     unsigned int channelsCount;
     unsigned int encoding;
     unsigned int bReturnsFloats;
