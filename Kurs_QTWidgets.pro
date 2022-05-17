@@ -23,6 +23,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    ExperimentAnalyzer/experimentanalysis.cpp \
+    ExperimentAnalyzer/experimentanalyzer.cpp \
     FunctionApproximator/NetFunctionApproximator/netfunctionapproximator.cpp \
     FunctionApproximator/abstractfunctionapproximator.cpp \
     FunctionExtraction/NdatFileFunctionExtraction/ndatfilefunctionextraction.cpp \
@@ -41,6 +43,8 @@ SOURCES += \
     rangeselectableqcustomplot.cpp
 
 HEADERS += \
+    ExperimentAnalyzer/experimentanalysis.h \
+    ExperimentAnalyzer/experimentanalyzer.h \
     FunctionApproximator/NetFunctionApproximator/netfunctionapproximator.h \
     FunctionApproximator/abstractfunctionapproximator.h \
     FunctionExtraction/NdatFileFunctionExtraction/ndatfilefunctionextraction.h \
