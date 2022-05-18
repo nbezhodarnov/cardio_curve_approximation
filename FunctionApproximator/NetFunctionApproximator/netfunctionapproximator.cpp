@@ -195,13 +195,13 @@ FunctionApproximation NetFunctionApproximator::calculateApproximation(const Func
             }
         }
         int variantsCount = 1;
-        for (const QList<std::array<double, 3>> &componentVariants : componentsVariants) {
+        for (const auto &componentVariants : componentsVariants) {
             variantsCount *= componentVariants.size();
         }
         QVector<int> componentVariantIndexes(componentsVariants.size());
         for (int i = 0; i < variantsCount; i++) {
             int variantIndex = i;
-            for (int j = 0; j < componentsVariants.size(); j++) {
+            for (int j = componentsVariants.size() - 1; j >= 0; j--) {
                 componentVariantIndexes[j] = variantIndex % componentsVariants[j].size();
                 variantIndex /= componentsVariants[j].size();
             }
