@@ -79,9 +79,14 @@ QVector<Function> ExperimentAnalyzer::extractOscillations(const Function &experi
 QVector<FunctionApproximation> ExperimentAnalyzer::calculateApproximations(const QVector<Function> &oscillations) const
 {
     QVector<FunctionApproximation> oscillationsApproximation = {};
+    std::array<double, 3> firstComponent = {0, 0, 0};
     for (const Function &oscillation : oscillations) {
-        FunctionApproximation oscillationApproximation = approximator->approximate(oscillation);
+        FunctionApproximation oscillationApproximation = approximator->approximate(oscillation, firstComponent);
         oscillationsApproximation.append(oscillationApproximation);
+        QVector<double> coefficients = oscillationApproximation.getCoefficients();
+        for (uint8_t i = 0; i < 3; i++) {
+            firstComponent[i] = coefficients[i];
+        }
     }
     return oscillationsApproximation;
 }
