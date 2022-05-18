@@ -26,6 +26,11 @@ void FunctionApproximation::set(const QVector<double> &coefficients_input) {
     coefficients.resize(7);
 }
 
+void FunctionApproximation::setConstant(const double &constant)
+{
+    coefficients[6] = constant;
+}
+
 QVector<double> FunctionApproximation::getCoefficients() const {
     return coefficients;
 }

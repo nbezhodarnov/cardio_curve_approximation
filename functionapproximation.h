@@ -10,6 +10,7 @@ public:
     FunctionApproximation(const QVector<double>&);
     void set(const double&, const double&, const double&, const double&, const double&, const double&, const double &constant = 0);
     void set(const QVector<double>&);
+    void setConstant(const double &);
     QVector<double> getCoefficients() const;
     double getValue(const double&) const;
     double getFirstComponentValue(const double&) const;
