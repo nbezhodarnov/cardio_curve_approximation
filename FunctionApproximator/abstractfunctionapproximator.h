@@ -1,6 +1,8 @@
 #ifndef ABSTRACTFUNCTIONAPPROXIMATOR_H
 #define ABSTRACTFUNCTIONAPPROXIMATOR_H
 
+#include <array>
+
 #include <QWidget>
 
 #include "function.h"
@@ -11,7 +13,7 @@ class AbstractFunctionApproximator
 public:
     AbstractFunctionApproximator(QWidget *ptr = nullptr);
     virtual ~AbstractFunctionApproximator();
-    virtual FunctionApproximation approximate(const Function&) = 0;
+    virtual FunctionApproximation approximate(const Function &function, const std::array<double, 3> &firstComponent = {0, 0, 0}) = 0;
 
 protected:
     QWidget *parent;
