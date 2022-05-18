@@ -58,3 +58,20 @@ double FunctionApproximation::getSecondDerivativeValue(const double &x) const {
 double FunctionApproximation::getConstant() const {
     return coefficients[6];
 }
+
+bool FunctionApproximation::operator==(const FunctionApproximation &other) const
+{
+    bool isEqual = true;
+    for (int i = 0; i < coefficients.size(); i++) {
+        if (std::abs(coefficients[i] - other.coefficients[i]) > 0.01) {
+            isEqual= false;
+            break;
+        }
+    }
+    return isEqual;
+}
+
+bool FunctionApproximation::operator!=(const FunctionApproximation &other) const
+{
+    return !(*this == other);
+}

@@ -19,6 +19,9 @@ public:
     double getSecondDerivativeValue(const double&) const;
     double getConstant() const;
 
+    bool operator==(const FunctionApproximation &other) const;
+    bool operator!=(const FunctionApproximation &other) const;
+
 private:
     QVector<double> coefficients;
 };
