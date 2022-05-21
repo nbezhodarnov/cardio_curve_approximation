@@ -22,6 +22,8 @@ private:
     double findConstant(const Function &function) const;
     Function normalizeFunction(const Function &function, const double &coefficient) const;
     FunctionApproximation calculateStartPoint(const Function &function, const std::array<double, 3> &firstComponent = {0, 0, 0}) const;
+    bool isValidApproximation(const Function &function, const FunctionApproximation &approximation) const;
+    double calculateDifference(const Function &function, const FunctionApproximation &approximation) const;
     FunctionApproximation calculateApproximation(const Function &function, const std::array<double, 3> &firstComponent = {0, 0, 0}) const;
 };
 

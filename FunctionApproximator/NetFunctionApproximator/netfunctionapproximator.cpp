@@ -105,9 +105,51 @@ FunctionApproximation NetFunctionApproximator::calculateStartPoint(const Functio
         a1 = std::abs(firstComponent[0]);
         b1 = std::abs(firstComponent[1]);
         c1 = firstComponent[2];
+        if (std::abs(c1 - c2) < 50 * step) {
+            c2 = c1 + 50 * step;
+        }
     }
 
     return FunctionApproximation(a1, b1, c1, a2, b2, c2);
+}
+
+bool NetFunctionApproximator::isValidApproximation(const Function &function, const FunctionApproximation &approximation) const
+{
+    unsigned int points_count = function.size();
+    double step = function.getStep();
+    double first_component_value_in_center = approximation.getFirstComponentValue(function.getKey(points_count / 2));
+    double second_component_value_in_center = approximation.getSecondComponentValue(function.getKey(points_count / 2));
+    if (first_component_value_in_center < function.getValue(points_count / 2) * 0.1) {
+        return false;
+    }
+    if (second_component_value_in_center < function.getValue(points_count / 2) * 0.1) {
+        return false;
+    }
+
+    QVector<double> approximationCoefficients = approximation.getCoefficients();
+    if (std::abs(approximationCoefficients[2] - approximationCoefficients[5]) < step * 50) {
+        return false;
+    }
+    if (function.getKey(0) > approximationCoefficients[2] || approximationCoefficients[2] > function.getKey(points_count - 1)) {
+        return false;
+    }
+    if (function.getKey(0) > approximationCoefficients[5] || approximationCoefficients[5] > function.getKey(points_count - 1)) {
+        return false;
+    }
+    return true;
+}
+
+double NetFunctionApproximator::calculateDifference(const Function &function, const FunctionApproximation &approximation) const
+{
+    double difference = 0;
+    unsigned int points_count = function.size();
+    for (unsigned int i = 0; i < points_count; ++i) {
+        double first_component_value = approximation.getFirstComponentValue(function.getKey(i));
+        double second_component_value = approximation.getSecondComponentValue(function.getKey(i));
+        double approximating_function = first_component_value + second_component_value;
+        difference += std::abs(function.getValue(i) - approximating_function);
+    }
+    return difference;
 }
 
 FunctionApproximation NetFunctionApproximator::calculateApproximation(const Function &function, const std::array<double, 3> &firstComponent) const
@@ -125,15 +167,9 @@ FunctionApproximation NetFunctionApproximator::calculateApproximation(const Func
     double step = function.getStep();
 
     QVector<double> coefficients = startPoint.getCoefficients();
-    double &a1 = coefficients[0];
-    double &b1 = coefficients[1];
-    double &c1 = coefficients[2];
-    double &a2 = coefficients[3];
-    double &b2 = coefficients[4];
-    double &c2 = coefficients[5];
 
-    out << "a1 = " << a1 << ", b1 = " << b1 << ", c1 = " << c1 << '\n' << flush;
-    out << "a2 = " << a2 << ", b2 = " << b2 << ", c2 = " << c2 << "\n\n" << flush;
+    out << "a1 = " << coefficients[0] << ", b1 = " << coefficients[1] << ", c1 = " << coefficients[2] << '\n' << flush;
+    out << "a2 = " << coefficients[3] << ", b2 = " << coefficients[4] << ", c2 = " << coefficients[5] << "\n\n" << flush;
 
     bool is_first_component_set = false;
     if (firstComponent[0] != 0) {
@@ -142,25 +178,24 @@ FunctionApproximation NetFunctionApproximator::calculateApproximation(const Func
 
     unsigned int firstEditableComponentIndex = 0;
     if (is_first_component_set) {
-        a1 = std::abs(firstComponent[0]);
-        b1 = std::abs(firstComponent[1]);
-        c1 = firstComponent[2];
+        coefficients[0] = std::abs(firstComponent[0]);
+        coefficients[1] = std::abs(firstComponent[1]);
+        coefficients[2] = firstComponent[2];
         firstEditableComponentIndex = 1;
     }
 
-    FunctionApproximation previousBestApproximation(0, 0, 0, 0, 0, 0);
-    FunctionApproximation bestApproximation(0, 0, 0, 0, 0, 0);
-    long double approximating_function = 0;
-    uint8_t little_changes_count = 0, max_little_changes = 50;
+    FunctionApproximation previousBestApproximation(coefficients);
+    FunctionApproximation bestApproximation(coefficients);
+    uint8_t little_changes_count = 0, big_changes_count = 0, max_little_changes = 50, big_changes_trigger = 10;
     double min_difference = INFINITY, previous_difference = 0, difference = 0;
     while (min_difference > step) {
-        if (!is_first_component_set && (c1 < function.getKey(0) - 1000 * step || c1 > function.getKey(points_count - 1) + 1000 * step)) {
-            a1 = b1 = 0;
-            c1 = function.getKey(0);
+        if (!is_first_component_set && (coefficients[2] < function.getKey(0) - 1000 * step || coefficients[2] > function.getKey(points_count - 1) + 1000 * step)) {
+            coefficients[0] = coefficients[1] = 0;
+            coefficients[2] = function.getKey(0);
         }
-        if (c2 < function.getKey(0) - 1000 * step || c2 > function.getKey(points_count - 1) + 1000 * step) {
-            a2 = b2 = 0;
-            c2 = function.getKey(points_count - 1);
+        if (coefficients[5] < function.getKey(0) - 1000 * step || coefficients[5] > function.getKey(points_count - 1) + 1000 * step) {
+            coefficients[3] = coefficients[4] = 0;
+            coefficients[5] = function.getKey(points_count - 1);
         }
         if (std::abs(previous_difference - min_difference) < step) {
             little_changes_count++;
@@ -174,22 +209,22 @@ FunctionApproximation NetFunctionApproximator::calculateApproximation(const Func
         previousBestApproximation = bestApproximation;
         uint8_t net_step = 5, net_step_center = net_step / 2;
 
-        QList<FunctionApproximation> approximations = {};
+        //QList<FunctionApproximation> approximations = {};
         QVector<QList<std::array<double, 3>>> componentsVariants(coefficients.size() / 3);
         if (is_first_component_set) {
-            componentsVariants[0].append({a1, b1, c1});
+            componentsVariants[0].append({coefficients[0], coefficients[1], coefficients[2]});
         }
         for (uint8_t i = firstEditableComponentIndex; i < componentsVariants.size(); i++) {
-            std::array<QVector<double>, 3> coefficientsVariants = {};
+            QVector<double> coefficientsVariants[3];
             for (uint8_t j = 0; j < 3; j++) {
                 for (uint8_t intend = 0; intend < net_step; intend++) {
-                    coefficientsVariants[j].append(coefficients[i * 3 + j] - (net_step_center - intend) * steps[j]);
+                    coefficientsVariants[j].push_back(coefficients[i * 3 + j] - (net_step_center - intend) * steps[j]);
                 }
             }
             for (uint8_t j = 0; j < coefficientsVariants[0].size(); j++) {
                 for (uint8_t k = 0; k < coefficientsVariants[1].size(); k++) {
                     for (uint8_t l = 0; l < coefficientsVariants[2].size(); l++) {
-                        componentsVariants[i].append({coefficientsVariants[0][j], coefficientsVariants[1][k], coefficientsVariants[2][l]});
+                        componentsVariants[i].push_back({coefficientsVariants[0][j], coefficientsVariants[1][k], coefficientsVariants[2][l]});
                     }
                 }
             }
@@ -211,37 +246,12 @@ FunctionApproximation NetFunctionApproximator::calculateApproximation(const Func
                     approximationVariantCoefficients[k * 3 + l] = componentsVariants[k][componentVariantIndexes[k]][l];
                 }
             }
-            approximations.append(FunctionApproximation(approximationVariantCoefficients));
-        }
-
-        for (const FunctionApproximation &approximation : approximations) {
-            QApplication::processEvents();
-            double first_component_value_in_center = approximation.getFirstComponentValue(function.getKey(points_count / 2));
-            double second_component_value_in_center = approximation.getSecondComponentValue(function.getKey(points_count / 2));
-            if (first_component_value_in_center < function.getValue(points_count / 2) * 0.1) {
+            //approximations.append(FunctionApproximation(approximationVariantCoefficients));
+            FunctionApproximation approximation(approximationVariantCoefficients);
+            if (!isValidApproximation(function, approximation)) {
                 continue;
             }
-            if (second_component_value_in_center < function.getValue(points_count / 2) * 0.1) {
-                continue;
-            }
-
-            QVector<double> approximationCoefficients = approximation.getCoefficients();
-            if (std::abs(approximationCoefficients[2] - approximationCoefficients[5]) < step * 50) {
-                continue;
-            }
-            if (function.getKey(0) > approximationCoefficients[2] || approximationCoefficients[2] > function.getKey(points_count - 1)) {
-                continue;
-            }
-            if (function.getKey(0) > approximationCoefficients[5] || approximationCoefficients[5] > function.getKey(points_count - 1)) {
-                continue;
-            }
-            difference = 0;
-            for (unsigned int i = 0; i < points_count; ++i) {
-                double first_component_value = approximation.getFirstComponentValue(function.getKey(i));
-                double second_component_value = approximation.getSecondComponentValue(function.getKey(i));
-                approximating_function = first_component_value + second_component_value;
-                difference += std::abs(function.getValue(i) - approximating_function);
-            }
+            difference = calculateDifference(function, approximation);
             if (difference < min_difference) {
                 min_difference = difference;
                 bestApproximation = approximation;
@@ -250,42 +260,43 @@ FunctionApproximation NetFunctionApproximator::calculateApproximation(const Func
 
         coefficients = bestApproximation.getCoefficients();
 
-        out << "a1 = " << a1 << ", b1 = " << b1 << ", c1 = " << c1 << '\n' << flush;
-        out << "a2 = " << a2 << ", b2 = " << b2 << ", c2 = " << c2 << '\n' << flush;
+        out << "a1 = " << coefficients[0] << ", b1 = " << coefficients[1] << ", c1 = " << coefficients[2] << '\n' << flush;
+        out << "a2 = " << coefficients[3] << ", b2 = " << coefficients[4] << ", c2 = " << coefficients[5] << "\n\n" << flush;
         out << min_difference << ' ' << previous_difference << '\n' << flush;
 
         out << '\n' << step1 << ' ' << step2 << ' ' << step3 << '\n' << flush;
         out << "\n\n" << flush;
 
-        bool not_changed = true;
-        for (uint8_t i = 0; i < 6; i++) {
-            if (previousBestApproximation == bestApproximation) {
-                not_changed = false;
-                break;
-            }
-        }
-        if (not_changed) {
+        if (previousBestApproximation == bestApproximation) {
             step1 /= 10;
             step2 /= 10;
             step3 /= 10;
+        } else {
+            big_changes_count++;
+            if (big_changes_count > big_changes_trigger) {
+                step1 *= 10;
+                step2 *= 10;
+                step3 *= 10;
+                big_changes_count = 0;
+            }
         }
     }
 
-    a1 = std::abs(a1);
-    a2 = std::abs(a2);
-    b1 = std::abs(b1);
-    b2 = std::abs(b2);
+    coefficients[0] = std::abs(coefficients[0]);
+    coefficients[3] = std::abs(coefficients[3]);
+    coefficients[1] = std::abs(coefficients[1]);
+    coefficients[4] = std::abs(coefficients[4]);
 
-    if (c2 < function.getKey(0) - 100 * step || c2 > function.getKey(points_count - 1) + 100 * step) {
-        a2 = b2 = c2 = 0;
-    } else if (c1 > c2) {
-        std::swap(a1, a2);
-        std::swap(b1, b2);
-        std::swap(c1, c2);
+    if (coefficients[5] < function.getKey(0) - 100 * step || coefficients[5] > function.getKey(points_count - 1) + 100 * step) {
+        coefficients[3] = coefficients[4] = coefficients[5] = 0;
+    } else if (coefficients[2] > coefficients[5]) {
+        std::swap(coefficients[0], coefficients[3]);
+        std::swap(coefficients[1], coefficients[4]);
+        std::swap(coefficients[2], coefficients[5]);
     }
 
-    out << "a1 = " << a1 << ", b1 = " << b1 << ", c1 = " << c1 << '\n' << flush;
-    out << "a2 = " << a2 << ", b2 = " << b2 << ", c2 = " << c2 << "\n\n" << flush;
+    out << "a1 = " << coefficients[0] << ", b1 = " << coefficients[1] << ", c1 = " << coefficients[2] << '\n' << flush;
+    out << "a2 = " << coefficients[3] << ", b2 = " << coefficients[4] << ", c2 = " << coefficients[5] << "\n\n" << flush;
 
     return bestApproximation;
 }
