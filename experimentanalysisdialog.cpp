@@ -20,7 +20,7 @@ ExperimentAnalysisDialog::~ExperimentAnalysisDialog()
 
 void ExperimentAnalysisDialog::on_exportPushButton_clicked()
 {
-    QString file_name = QFileDialog::getSaveFileName(this, tr("Сохранить результаты"), "", tr("Результаты (*.nresult);;Все файлы (*)"));
+    QString file_name = QFileDialog::getSaveFileName(this, tr("Сохранить результаты"), "", tr("Результаты (*.nar);;Все файлы (*)"));
     if (file_name.isEmpty()) {
         //std::cerr << "No file name has been provided!\n";
         return;
