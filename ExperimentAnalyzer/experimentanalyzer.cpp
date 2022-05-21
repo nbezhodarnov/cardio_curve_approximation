@@ -1,6 +1,6 @@
 #include "experimentanalyzer.h"
 
-ExperimentAnalyzer::ExperimentAnalyzer(std::unique_ptr<AbstractFunctionApproximator> &functionApproximator) :
+ExperimentAnalyzer::ExperimentAnalyzer(std::unique_ptr<AbstractFunctionApproximator> functionApproximator) :
     approximator(std::move(functionApproximator))
 {
 

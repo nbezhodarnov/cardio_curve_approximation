@@ -11,7 +11,7 @@
 class ExperimentAnalyzer
 {
 public:
-    ExperimentAnalyzer(std::unique_ptr<AbstractFunctionApproximator> &functionApproximator);
+    ExperimentAnalyzer(std::unique_ptr<AbstractFunctionApproximator> functionApproximator);
     ExperimentAnalysis analyze(const Function &experiment) const;
 
 private:
