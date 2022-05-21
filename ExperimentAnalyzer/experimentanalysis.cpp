@@ -15,12 +15,21 @@ void ExperimentAnalysis::append(const FunctionApproximation &oscillation)
     analyzes.append({secondComponentMaxValue, oscillation});
 }
 
-const FunctionApproximation &ExperimentAnalysis::getOscillation(unsigned int index) const
+FunctionApproximation ExperimentAnalysis::getOscillation(unsigned int index) const
 {
     if (index >= (unsigned int)analyzes.size()) {
         throw std::runtime_error("Trying to access unexisted oscillation!");
     }
     return analyzes[index].oscillation;
+}
+
+QVector<FunctionApproximation> ExperimentAnalysis::getOscillations() const
+{
+    QVector<FunctionApproximation> oscillations;
+    for (const OscillationAnalysis &analysis : analyzes) {
+        oscillations.append(analysis.oscillation);
+    }
+    return oscillations;
 }
 
 Function ExperimentAnalysis::getDymanics() const

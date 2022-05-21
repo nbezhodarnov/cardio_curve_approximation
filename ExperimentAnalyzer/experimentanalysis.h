@@ -16,7 +16,8 @@ class ExperimentAnalysis
 public:
     ExperimentAnalysis(const QVector<FunctionApproximation> &oscillations = {});
     void append(const FunctionApproximation &oscillation);
-    const FunctionApproximation& getOscillation(unsigned int index) const;
+    FunctionApproximation getOscillation(unsigned int index) const;
+    QVector<FunctionApproximation> getOscillations() const;
     Function getDymanics() const;
 
 private:
