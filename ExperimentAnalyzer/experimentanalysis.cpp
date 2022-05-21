@@ -70,5 +70,6 @@ double ExperimentAnalysis::findSecondComponentMaxValue(const FunctionApproximati
     std::function<double (const double&)> function = [&oscillation](const double &key){return oscillation.getSecondComponentValue(key);};
     QVector<double> coefficients = oscillation.getCoefficients();
     double startValue = coefficients[5];
-    return findFunctionMaxValue(function, startValue);
+    double keyOfMaxValue = findFunctionMaxValue(function, startValue);
+    return oscillation.getSecondComponentValue(keyOfMaxValue);
 }
