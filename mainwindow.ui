@@ -93,6 +93,16 @@
        </widget>
       </item>
       <item>
+       <widget class="QPushButton" name="analyze_start">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>Начать анализ</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="approximation_start">
         <property name="enabled">
          <bool>false</bool>
@@ -142,7 +152,7 @@
      <x>0</x>
      <y>0</y>
      <width>700</width>
-     <height>23</height>
+     <height>21</height>
     </rect>
    </property>
   </widget>

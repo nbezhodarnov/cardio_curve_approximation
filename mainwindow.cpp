@@ -48,6 +48,10 @@ MainWindow::~MainWindow()
     for (unsigned int i = 0; i < (unsigned int)results_windows.size(); i++) {
         delete results_windows[i];
     }
+
+    for (unsigned int i = 0; i < (unsigned int)analysis_windows.size(); i++) {
+        delete analysis_windows[i];
+    }
 }
 
 void MainWindow::on_make_plot_clicked()
@@ -56,7 +60,9 @@ void MainWindow::on_make_plot_clicked()
     if (function == Function()) {
         return;
     }
+    experiment = function;
 
+    ui->analyze_start->setEnabled(true);
     ui->widget->setEnabled(true);
     ui->widget->setVisible(true);
     ui->widget->setFunction(function);
@@ -523,3 +529,11 @@ void MainWindow::on_open_results_from_file_clicked()
     results_windows.push_back(new FunctionApproximationTabWidget(nullptr, FunctionApproximation(result)));
     results_windows[results_windows.size() - 1]->show();
 }
+
+void MainWindow::on_analyze_start_clicked()
+{
+    ExperimentAnalyzer analyzer(std::unique_ptr<AbstractFunctionApproximator>(new NetFunctionApproximator()));
+    ExperimentAnalysis analysis = analyzer.analyze(experiment);
+    analysis_windows.push_back(new ExperimentAnalysisDialog(analysis));
+}
+

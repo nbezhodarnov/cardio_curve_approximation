@@ -8,7 +8,9 @@
 
 #include "function.h"
 #include "functionapproximation.h"
+#include "experimentanalysisdialog.h"
 #include "functionapproximationtabwidget.h"
+#include "ExperimentAnalyzer/experimentanalyzer.h"
 #include "FunctionExtraction/abstractfunctionextraction.h"
 #include "FunctionApproximator/abstractfunctionapproximator.h"
 
@@ -39,13 +41,18 @@ private slots:
 
     void on_open_results_from_file_clicked();
 
+    void on_analyze_start_clicked();
+
 private:
     Ui::MainWindow *ui;
     FunctionApproximation approximation;
     AbstractFunctionExtraction *extractor;
     AbstractFunctionApproximator *approximator;
 
+    Function experiment;
+
     QVector<FunctionApproximationTabWidget*> results_windows;
+    QVector<ExperimentAnalysisDialog*> analysis_windows;
 };
 
 #endif // MAINWINDOW_H
