@@ -535,5 +535,6 @@ void MainWindow::on_analyze_start_clicked()
     ExperimentAnalyzer analyzer(std::unique_ptr<AbstractFunctionApproximator>(new NetFunctionApproximator()));
     ExperimentAnalysis analysis = analyzer.analyze(experiment);
     analysis_windows.push_back(new ExperimentAnalysisDialog(analysis));
+    analysis_windows.last()->show();
 }
 
