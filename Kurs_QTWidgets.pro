@@ -32,6 +32,7 @@ SOURCES += \
     FunctionExtraction/OldFileFunctionExtraction/oldfilefunctionextractiondialog.cpp \
     FunctionExtraction/abstractfunctionextraction.cpp \
     FunctionExtraction/filefunctionextractionmanager.cpp \
+    experimentanalysisdialog.cpp \
     function.cpp \
     functionapproximation.cpp \
     functionapproximationtabwidget.cpp \
@@ -52,6 +53,7 @@ HEADERS += \
     FunctionExtraction/OldFileFunctionExtraction/oldfilefunctionextractiondialog.h \
     FunctionExtraction/abstractfunctionextraction.h \
     FunctionExtraction/filefunctionextractionmanager.h \
+    experimentanalysisdialog.h \
     function.h \
     functionapproximation.h \
     functionapproximationtabwidget.h \
@@ -63,6 +65,7 @@ HEADERS += \
 
 FORMS += \
         FunctionExtraction/OldFileFunctionExtraction/oldfilefunctionextractiondialog.ui \
+        experimentanalysisdialog.ui \
         functionapproximationtabwidget.ui \
         interactableqcustomplot.ui \
         mainwindow.ui
