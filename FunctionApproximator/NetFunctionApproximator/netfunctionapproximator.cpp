@@ -127,7 +127,7 @@ bool NetFunctionApproximator::isValidApproximation(const Function &function, con
     }
 
     QVector<double> approximationCoefficients = approximation.getCoefficients();
-    if (std::abs(approximationCoefficients[2] - approximationCoefficients[5]) < step * 50) {
+    if (std::abs(approximationCoefficients[2] - approximationCoefficients[5]) < step * 30) {
         return false;
     }
     if (function.getKey(0) > approximationCoefficients[2] || approximationCoefficients[2] > function.getKey(points_count - 1)) {
@@ -186,7 +186,7 @@ FunctionApproximation NetFunctionApproximator::calculateApproximation(const Func
 
     FunctionApproximation previousBestApproximation(coefficients);
     FunctionApproximation bestApproximation(coefficients);
-    uint8_t little_changes_count = 0, big_changes_count = 0, max_little_changes = 50, big_changes_trigger = 10;
+    uint8_t little_changes_count = 0, big_changes_count = 0, max_little_changes = 10, big_changes_trigger = 10;
     double min_difference = INFINITY, previous_difference = 0, difference = 0;
     while (min_difference > step) {
         if (!is_first_component_set && (coefficients[2] < function.getKey(0) - 1000 * step || coefficients[2] > function.getKey(points_count - 1) + 1000 * step)) {
