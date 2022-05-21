@@ -41,6 +41,9 @@ void InteractableQCustomPlot::setFunction(const Function &function_input) {
     min_y = function.getValue(0);
 
     QVector<double> x, y;
+    x.push_back(function.getKey(0));
+    y.push_back(function.getValue(0));
+
     for (unsigned int i = 1; i < function.size(); i++) {
         if (function.getValue(i) < min_y) {
             min_y = function.getValue(i);
