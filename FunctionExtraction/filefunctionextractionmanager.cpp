@@ -6,6 +6,7 @@
 
 #include "filefunctionextractionmanager.h"
 #include "OldFileFunctionExtraction/oldfilefunctionextraction.h"
+#include "DatFileFunctionExtraction/datfilefunctionextraction.h"
 #include "NdatFileFunctionExtraction/ndatfilefunctionextraction.h"
 
 qint64 OpenFileError() {
@@ -46,7 +47,7 @@ Function FileFunctionExtractionManager::extract() {
     QFile file;
     qint64 ret = QMessageBox::Yes;
     while (ret == QMessageBox::Yes) {
-        QString file_name = QFileDialog::getOpenFileName(parent, QString::fromUtf8("Открыть файл"), "", QString::fromUtf8("Файлы ndat (*.ndat);;Все файлы (*)"));
+        QString file_name = QFileDialog::getOpenFileName(parent, QString::fromUtf8("Открыть файл"), "", QString::fromUtf8("Файлы ndat (*.ndat);;Файлы dat (*.dat);;Все файлы (*)"));
         if (file_name == "") {
             QTextStream(stdout) << "No file has been opened.\n" << flush;
             return Function();
@@ -59,6 +60,9 @@ Function FileFunctionExtractionManager::extract() {
             file.close();
             if (QFileInfo(file_name).suffix() == "ndat") {
                 extractor = new NdatFileFunctionExtraction(file_name, parent);
+                result = extractor->extract();
+            } else if (QFileInfo(file_name).suffix() == "dat") {
+                extractor = new DatFileFunctionExtraction(file_name, parent);
                 result = extractor->extract();
             } else {
                 extractor = new OldFileFunctionExtraction(file_name, parent);

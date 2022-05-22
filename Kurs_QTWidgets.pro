@@ -27,6 +27,7 @@ SOURCES += \
     ExperimentAnalyzer/experimentanalyzer.cpp \
     FunctionApproximator/NetFunctionApproximator/netfunctionapproximator.cpp \
     FunctionApproximator/abstractfunctionapproximator.cpp \
+    FunctionExtraction/DatFileFunctionExtraction/datfilefunctionextraction.cpp \
     FunctionExtraction/NdatFileFunctionExtraction/ndatfilefunctionextraction.cpp \
     FunctionExtraction/OldFileFunctionExtraction/oldfilefunctionextraction.cpp \
     FunctionExtraction/OldFileFunctionExtraction/oldfilefunctionextractiondialog.cpp \
@@ -48,6 +49,7 @@ HEADERS += \
     ExperimentAnalyzer/experimentanalyzer.h \
     FunctionApproximator/NetFunctionApproximator/netfunctionapproximator.h \
     FunctionApproximator/abstractfunctionapproximator.h \
+    FunctionExtraction/DatFileFunctionExtraction/datfilefunctionextraction.h \
     FunctionExtraction/NdatFileFunctionExtraction/ndatfilefunctionextraction.h \
     FunctionExtraction/OldFileFunctionExtraction/oldfilefunctionextraction.h \
     FunctionExtraction/OldFileFunctionExtraction/oldfilefunctionextractiondialog.h \
