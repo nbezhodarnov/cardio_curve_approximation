@@ -269,7 +269,14 @@ FunctionApproximation NetFunctionApproximator::calculateApproximation(const Func
             big_changes_count = 0;
             little_changes_count++;
             if (little_changes_count > max_little_changes) {
-                break;
+                if (steps[0] < step / 1000) {
+                    break;
+                } else {
+                    step1 *= 10;
+                    step2 *= 10;
+                    step3 *= 10;
+                    little_changes_count = 0;
+                }
             }
         } else {
             little_changes_count = 0;

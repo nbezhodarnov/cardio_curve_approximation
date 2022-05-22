@@ -54,7 +54,7 @@ QVector<Function> ExperimentAnalyzer::extractOscillations(const Function &experi
         if (firstDerivative >= 2.5) {
             double oscillationStartValue = experiment.getValue(index);
             Function oscillation = {};
-            unsigned int indent = 50;
+            unsigned int indent = 25;
             for (unsigned int i = index - indent; i < index; i++) {
                 oscillation.add(experiment.getElement(i));
             }
@@ -82,6 +82,7 @@ QVector<FunctionApproximation> ExperimentAnalyzer::calculateApproximations(const
     std::array<double, 3> firstComponent = {0, 0, 0};
     for (const Function &oscillation : oscillations) {
         firstComponent[2] += oscillation.getKey(0);
+        firstComponent = {0, 0, 0};
         FunctionApproximation oscillationApproximation = approximator->approximate(oscillation, firstComponent);
         oscillationsApproximation.append(oscillationApproximation);
         QVector<double> coefficients = oscillationApproximation.getCoefficients();
