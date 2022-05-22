@@ -8,7 +8,8 @@ ExperimentAnalysisDialog::ExperimentAnalysisDialog(ExperimentAnalysis newAnalysi
     analysis(newAnalysis)
 {
     ui->setupUi(this);
-    ui->dynamicsPlot->setFunction(analysis.getDymanics());
+    ui->dynamicsOfFirstComponentPlot->setFunction(analysis.getDymanicsOfFirstComponent());
+    ui->dynamicsOfSecondComponentPlot->setFunction(analysis.getDymanicsOfSecondComponent());
 }
 
 ExperimentAnalysisDialog::~ExperimentAnalysisDialog()

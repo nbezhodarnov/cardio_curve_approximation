@@ -15,7 +15,10 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
-    <widget class="InteractableQCustomPlot" name="dynamicsPlot" native="true"/>
+    <widget class="InteractableQCustomPlot" name="dynamicsOfFirstComponentPlot" native="true"/>
+   </item>
+   <item>
+    <widget class="InteractableQCustomPlot" name="dynamicsOfSecondComponentPlot" native="true"/>
    </item>
    <item>
     <widget class="QPushButton" name="exportPushButton">

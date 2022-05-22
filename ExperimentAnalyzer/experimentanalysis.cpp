@@ -11,8 +11,9 @@ ExperimentAnalysis::ExperimentAnalysis(const QVector<FunctionApproximation> &osc
 
 void ExperimentAnalysis::append(const FunctionApproximation &oscillation)
 {
+    double firstComponentMaxValue = findFirstComponentMaxValue(oscillation);
     double secondComponentMaxValue = findSecondComponentMaxValue(oscillation);
-    analyzes.append({secondComponentMaxValue, oscillation});
+    analyzes.append({firstComponentMaxValue, secondComponentMaxValue, oscillation});
 }
 
 FunctionApproximation ExperimentAnalysis::getOscillation(unsigned int index) const
@@ -32,7 +33,16 @@ QVector<FunctionApproximation> ExperimentAnalysis::getOscillations() const
     return oscillations;
 }
 
-Function ExperimentAnalysis::getDymanics() const
+Function ExperimentAnalysis::getDymanicsOfFirstComponent() const
+{
+    Function dynamics;
+    for (int i = 0; i < analyzes.size(); i++) {
+        dynamics.add({static_cast<double>(i), analyzes[i].firstComponentMaxValue});
+    }
+    return dynamics;
+}
+
+Function ExperimentAnalysis::getDymanicsOfSecondComponent() const
 {
     Function dynamics;
     for (int i = 0; i < analyzes.size(); i++) {
@@ -63,6 +73,15 @@ double ExperimentAnalysis::findFunctionMaxValue(const std::function<double (cons
         max_difference = std::max({max - step_left_value, max - in_key_value, max - step_right_value});
     }
     return key;
+}
+
+double ExperimentAnalysis::findFirstComponentMaxValue(const FunctionApproximation &oscillation) const
+{
+    std::function<double (const double&)> function = [&oscillation](const double &key){return oscillation.getFirstComponentValue(key);};
+    QVector<double> coefficients = oscillation.getCoefficients();
+    double startValue = coefficients[5];
+    double keyOfMaxValue = findFunctionMaxValue(function, startValue);
+    return oscillation.getSecondComponentValue(keyOfMaxValue);
 }
 
 double ExperimentAnalysis::findSecondComponentMaxValue(const FunctionApproximation &oscillation) const
