@@ -295,6 +295,7 @@ FunctionApproximation NetFunctionApproximator::calculateApproximation(const Func
         std::swap(coefficients[1], coefficients[4]);
         std::swap(coefficients[2], coefficients[5]);
     }
+    bestApproximation = FunctionApproximation(coefficients);
 
     out << "a1 = " << coefficients[0] << ", b1 = " << coefficients[1] << ", c1 = " << coefficients[2] << '\n' << flush;
     out << "a2 = " << coefficients[3] << ", b2 = " << coefficients[4] << ", c2 = " << coefficients[5] << "\n\n" << flush;
