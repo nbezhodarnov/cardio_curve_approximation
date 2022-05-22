@@ -207,7 +207,7 @@ FunctionApproximation NetFunctionApproximator::calculateApproximation(const Func
         }
         previous_difference = min_difference;
         previousBestApproximation = bestApproximation;
-        uint8_t net_step = 5, net_step_center = net_step / 2;
+        uint8_t net_step = 3, net_step_center = net_step / 2;
 
         //QList<FunctionApproximation> approximations = {};
         QVector<QList<std::array<double, 3>>> componentsVariants(coefficients.size() / 3);
