@@ -97,16 +97,16 @@ FunctionApproximation NetFunctionApproximator::calculateStartPoint(const Functio
         a1 /= 2;
         a2 = a1;
         b2 = b1;
-        c1 -= step * 25;
-        c2 += step * 25;
+        c1 -= step * (static_cast<double>(points_count) * 0.1);
+        c2 += step * (static_cast<double>(points_count) * 0.1);
     }
 
     if (is_first_component_set) {
         a1 = std::abs(firstComponent[0]);
         b1 = std::abs(firstComponent[1]);
         c1 = firstComponent[2];
-        if (std::abs(c1 - c2) < 50 * step) {
-            c2 = c1 + 50 * step;
+        if (std::abs(c1 - c2) < step * (static_cast<double>(points_count) * 0.2)) {
+            c2 = c1 + step * (static_cast<double>(points_count) * 0.2);
         }
     }
 
@@ -127,7 +127,7 @@ bool NetFunctionApproximator::isValidApproximation(const Function &function, con
     }
 
     QVector<double> approximationCoefficients = approximation.getCoefficients();
-    if (std::abs(approximationCoefficients[2] - approximationCoefficients[5]) < step * 30) {
+    if (std::abs(approximationCoefficients[2] - approximationCoefficients[5]) < step * (static_cast<double>(points_count) * 0.1)) {
         return false;
     }
     if (function.getKey(0) > approximationCoefficients[2] || approximationCoefficients[2] > function.getKey(points_count - 1)) {
@@ -197,14 +197,6 @@ FunctionApproximation NetFunctionApproximator::calculateApproximation(const Func
             coefficients[3] = coefficients[4] = 0;
             coefficients[5] = function.getKey(points_count - 1);
         }
-        if (std::abs(previous_difference - min_difference) < step) {
-            little_changes_count++;
-            if (little_changes_count > max_little_changes) {
-                break;
-            }
-        } else {
-            little_changes_count = 0;
-        }
         previous_difference = min_difference;
         previousBestApproximation = bestApproximation;
         uint8_t net_step = 3, net_step_center = net_step / 2;
@@ -271,7 +263,16 @@ FunctionApproximation NetFunctionApproximator::calculateApproximation(const Func
             step1 /= 10;
             step2 /= 10;
             step3 /= 10;
+        }
+
+        if (std::abs(previous_difference - min_difference) < step) {
+            big_changes_count = 0;
+            little_changes_count++;
+            if (little_changes_count > max_little_changes) {
+                break;
+            }
         } else {
+            little_changes_count = 0;
             big_changes_count++;
             if (big_changes_count > big_changes_trigger) {
                 step1 *= 10;
