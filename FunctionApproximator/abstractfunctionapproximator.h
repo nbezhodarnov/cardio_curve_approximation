@@ -13,7 +13,7 @@ class AbstractFunctionApproximator
 public:
     AbstractFunctionApproximator(QWidget *ptr = nullptr);
     virtual ~AbstractFunctionApproximator();
-    virtual FunctionApproximation approximate(const Function &function, const std::array<double, 3> &firstComponent = {0, 0, 0}) = 0;
+    virtual FunctionApproximation approximate(const Function &function, const FunctionApproximation &startPoint = FunctionApproximation(0, 0, 0, 0, 0, 0), const std::array<double, 3> &firstComponent = {0, 0, 0}) = 0;
 
 protected:
     QWidget *parent;

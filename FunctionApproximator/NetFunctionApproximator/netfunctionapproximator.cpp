@@ -21,7 +21,7 @@ inline bool LineIndexes::isIndexOutOfLine(unsigned int index) {
 NetFunctionApproximator::NetFunctionApproximator(QWidget *ptr): AbstractFunctionApproximator(ptr) {
 }
 
-FunctionApproximation NetFunctionApproximator::approximate(const Function &function, const std::array<double, 3> &firstComponent) {
+FunctionApproximation NetFunctionApproximator::approximate(const Function &function,  const FunctionApproximation &startPoint, const std::array<double, 3> &firstComponent) {
     QMessageBox msgBox(parent);
     msgBox.setWindowTitle(QString::fromUtf8("Пожалуйста, подождите"));
     msgBox.setText(QString::fromUtf8("Пожалуйста, подождите. Идут вычисления."));
@@ -34,7 +34,7 @@ FunctionApproximation NetFunctionApproximator::approximate(const Function &funct
 
     double constant = findConstant(function);
     Function normalized_function = normalizeFunction(function, constant);
-    FunctionApproximation approximation = calculateApproximation(normalized_function, firstComponent);
+    FunctionApproximation approximation = calculateApproximation(normalized_function, startPoint, firstComponent);
 
     approximation.setConstant(constant);
 
@@ -61,6 +61,12 @@ Function NetFunctionApproximator::normalizeFunction(const Function &function, co
         normalized_function.add({function.getKey(i), function.getValue(i) - coefficient});
     }
     return normalized_function;
+}
+
+bool NetFunctionApproximator::isApproximationSet(const FunctionApproximation &approximation) const
+{
+    QVector<double> coefficients = approximation.getCoefficients();
+    return coefficients[0] > 0.00001 || coefficients[3] > 0.00001;
 }
 
 FunctionApproximation NetFunctionApproximator::calculateStartPoint(const Function &function, const std::array<double, 3> &firstComponent) const
@@ -152,11 +158,17 @@ double NetFunctionApproximator::calculateDifference(const Function &function, co
     return difference;
 }
 
-FunctionApproximation NetFunctionApproximator::calculateApproximation(const Function &function, const std::array<double, 3> &firstComponent) const
+FunctionApproximation NetFunctionApproximator::calculateApproximation(const Function &function, const FunctionApproximation &startPoint, const std::array<double, 3> &firstComponent) const
 {
     QTextStream out(stdout);
 
-    FunctionApproximation startPoint = calculateStartPoint(function, firstComponent);
+    FunctionApproximation approximationStartPoint(0, 0, 0, 0, 0, 0);
+    if (isApproximationSet(startPoint)) {
+        approximationStartPoint = startPoint;
+        approximationStartPoint.setConstant(0);
+    } else {
+        approximationStartPoint = calculateStartPoint(function, firstComponent);
+    }
 
     QVector<double> steps = {10, 50, 10};
     double &step1 = steps[0];
@@ -166,7 +178,7 @@ FunctionApproximation NetFunctionApproximator::calculateApproximation(const Func
     unsigned int points_count = function.size();
     double step = function.getStep();
 
-    QVector<double> coefficients = startPoint.getCoefficients();
+    QVector<double> coefficients = approximationStartPoint.getCoefficients();
 
     out << "a1 = " << coefficients[0] << ", b1 = " << coefficients[1] << ", c1 = " << coefficients[2] << '\n' << flush;
     out << "a2 = " << coefficients[3] << ", b2 = " << coefficients[4] << ", c2 = " << coefficients[5] << "\n\n" << flush;

@@ -79,17 +79,27 @@ QVector<Function> ExperimentAnalyzer::extractOscillations(const Function &experi
 QVector<FunctionApproximation> ExperimentAnalyzer::calculateApproximations(const QVector<Function> &oscillations) const
 {
     QVector<FunctionApproximation> oscillationsApproximation = {};
+    FunctionApproximation firstOscillationApproximation(0, 0, 0, 0, 0, 0);
+    bool isFirstOscillationApproximationSet = false;
     std::array<double, 3> firstComponent = {0, 0, 0};
+    QVector<double> coefficients = {0, 0, 0, 0, 0, 0, 0};
     for (const Function &oscillation : oscillations) {
-        firstComponent[2] += oscillation.getKey(0);
-        firstComponent = {0, 0, 0};
-        FunctionApproximation oscillationApproximation = approximator->approximate(oscillation, firstComponent);
-        oscillationsApproximation.append(oscillationApproximation);
-        QVector<double> coefficients = oscillationApproximation.getCoefficients();
+        coefficients[2] += oscillation.getKey(0);
+        coefficients[5] += oscillation.getKey(0);
         for (uint8_t i = 0; i < 3; i++) {
             firstComponent[i] = coefficients[i];
         }
-        firstComponent[2] -= oscillation.getKey(0);
+        firstOscillationApproximation = FunctionApproximation(coefficients);
+        firstComponent = {0, 0, 0};
+        FunctionApproximation oscillationApproximation = approximator->approximate(oscillation, firstOscillationApproximation, firstComponent);
+        if (!isFirstOscillationApproximationSet) {
+            firstOscillationApproximation = oscillationApproximation;
+            coefficients = oscillationApproximation.getCoefficients();
+            isFirstOscillationApproximationSet = true;
+        }
+        oscillationsApproximation.append(oscillationApproximation);
+        coefficients[2] -= oscillation.getKey(0);
+        coefficients[5] -= oscillation.getKey(0);
     }
     return oscillationsApproximation;
 }
