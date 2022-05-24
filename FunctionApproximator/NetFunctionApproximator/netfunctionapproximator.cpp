@@ -115,7 +115,6 @@ FunctionApproximation NetFunctionApproximator::calculateStartPoint(const Functio
             c2 = c1 + step * (static_cast<double>(points_count) * 0.2);
         }
     }
-
     return FunctionApproximation(a1, b1, c1, a2, b2, c2);
 }
 
@@ -275,6 +274,9 @@ FunctionApproximation NetFunctionApproximator::calculateApproximation(const Func
             step1 /= 10;
             step2 /= 10;
             step3 /= 10;
+            if (step1 < 1e-20) {
+                return FunctionApproximation(0, 0, 0, 0, 0, 0);
+            }
         }
 
         if (std::abs(previous_difference - min_difference) < step) {
