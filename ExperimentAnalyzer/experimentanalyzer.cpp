@@ -8,8 +8,7 @@ ExperimentAnalyzer::ExperimentAnalyzer(std::unique_ptr<AbstractFunctionApproxima
 
 ExperimentAnalysis ExperimentAnalyzer::analyze(const Function &experiment) const
 {
-    Function experimentWithoutNoise = removeNoise(experiment);
-    QVector<Function> oscillations = extractOscillations(experimentWithoutNoise);
+    QVector<Function> oscillations = extractOscillations(experiment);
     QVector<FunctionApproximation> oscillationsApproximation = calculateApproximations(oscillations);
     ExperimentAnalysis analysis = formAnalysis(oscillationsApproximation);
     return analysis;
@@ -46,32 +45,43 @@ Function ExperimentAnalyzer::removeNoise(const Function &experiment) const
 
 QVector<Function> ExperimentAnalyzer::extractOscillations(const Function &experiment) const
 {
+    double derivativeGate = 2.5;
     QVector<Function> oscillations = {};
-    unsigned int index = 1;
-    while (index < experiment.size()) {
+    int index = 0;
+    while (index + 1 < static_cast<int>(experiment.size())) {
+        index++;
         double functionStep = experiment.getStep();
         double firstDerivative = (experiment.getValue(index) - experiment.getValue(index - 1)) / functionStep;
-        if (firstDerivative >= 2.5) {
+        if (firstDerivative >= derivativeGate) {
+            double firstDerivativesSum = 0;
+            for (unsigned int i = index + 1; i < std::min(experiment.size(), static_cast<unsigned int>(index + 6)); i++) {
+                firstDerivativesSum += (experiment.getValue(i) - experiment.getValue(i - 1)) / functionStep;
+            }
+            if (firstDerivativesSum < 3 * firstDerivative) {
+                derivativeGate = firstDerivative;
+                continue;
+            }
+
             double oscillationStartValue = experiment.getValue(index);
             Function oscillation = {};
-            unsigned int indent = 25;
-            for (unsigned int i = index - indent; i < index; i++) {
-                oscillation.add(experiment.getElement(i));
-            }
-            while (index < experiment.size() && oscillationStartValue <= experiment.getValue(index)) {
-                oscillation.add(experiment.getElement(index));
+            int indent = 0;
+            int startIndex = index;
+            while (index < static_cast<int>(experiment.size()) && oscillationStartValue <= experiment.getValue(index)) {
                 index++;
             }
-            if (index >= experiment.size()) {
+            if (index >= static_cast<int>(experiment.size())) {
                 break;
             }
-            unsigned int oscillationEnd = std::min(index + indent, experiment.size());
-            for (; index < oscillationEnd; index++) {
+            if (index - startIndex < 5) {
+                continue;
+            }
+            indent = (index - startIndex) * 15 / 100;
+            int oscillationEnd = std::min(index + indent, static_cast<int>(experiment.size()));
+            for (index = std::max(startIndex - indent, 0); index < oscillationEnd; index++) {
                 oscillation.add(experiment.getElement(index));
             }
             oscillations.append(oscillation);
         }
-        index++;
     }
     return oscillations;
 }
