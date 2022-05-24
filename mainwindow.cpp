@@ -69,35 +69,10 @@ void MainWindow::on_make_plot_clicked()
     connect(ui->widget, SIGNAL(rangeSelectionStateChanged(bool)), this, SLOT(on_rangeSelectionStateChanged(bool)));
 }
 
-// Вычисление результата скользящего среднего
-Function getMA(Function function, int size) {
-    Function result;
-    // size - количество отсчетов интервала усреднения
-    double sumx = 0; // сумма отсчетов на интервале
-    double *mas = new double[size]; // массив для хранения size отсчетов
-    int index = 0; // индекс элемента массива
-    for (int i = 0; i < size; i++) mas[i] = 0;
-    for (unsigned int i = 0; i < function.size(); i++) {
-        sumx -= mas[index];
-        mas[index] = function.getValue(i);
-        sumx += mas[index];
-        index++;
-        if (index >= size)
-            index = 0; // возврат к началу "окна"
-        result.add({function.getKey(i), sumx / size});
-    }
-    delete []mas;
-    return result;
-}
-
 void MainWindow::on_approximation_start_clicked()
 {
     Function data = ui->widget->getSelectedRange();
-    unsigned int points_interval = 15;
-    Function moving_average = getMA(data, points_interval);
-    moving_average.moveByAxisX(-1.0 * (double)points_interval * data.getStep() / 2.0);
-    moving_average.removeElementsFromBeginning(points_interval);
-    approximation = approximator->approximate(moving_average);
+    approximation = approximator->approximate(data);
 
     unsigned int n = 100;
     Function result, e_first, e_second;
