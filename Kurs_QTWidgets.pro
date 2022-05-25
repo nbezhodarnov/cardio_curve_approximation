@@ -41,6 +41,7 @@ SOURCES += \
     interactableqcustomplot.cpp \
         main.cpp \
         mainwindow.cpp \
+    mathfunctions.cpp \
     qcustomplot.cpp \
     rangeselectableqcustomplot.cpp
 
@@ -62,6 +63,7 @@ HEADERS += \
     functionelement.h \
     interactableqcustomplot.h \
         mainwindow.h \
+    mathfunctions.h \
     qcustomplot.h \
     rangeselectableqcustomplot.h
 

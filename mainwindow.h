@@ -7,6 +7,7 @@
 #include <qcustomplot.h>
 
 #include "function.h"
+#include "mathfunctions.h"
 #include "functionapproximation.h"
 #include "experimentanalysisdialog.h"
 #include "functionapproximationtabwidget.h"

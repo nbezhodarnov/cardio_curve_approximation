@@ -1,5 +1,6 @@
 #include <QTextStream>
 
+#include "mathfunctions.h"
 #include "datfilefunctionextraction.h"
 
 DatFileFunctionExtraction::DatFileFunctionExtraction(QString fileName, QWidget *ptr): AbstractFunctionExtraction(ptr), file(fileName) {
@@ -52,5 +53,7 @@ Function DatFileFunctionExtraction::extract() {
     }
     elements.clear();
     file.seek(0);
+    result = getMA(result, 10);
+    result.removeElementsFromBeginning(10);
     return result;
 }

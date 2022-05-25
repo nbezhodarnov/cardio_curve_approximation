@@ -6,13 +6,8 @@
 
 #include <QTabWidget>
 
+#include "mathfunctions.h"
 #include "functionapproximation.h"
-
-double findKeyByValue(const std::function<double (const double&)> &function, const double &value, const double &precision = 0.001, const double &start = 0);
-
-double findMaximum(const std::function<double (const double&)> &function, const double &precision = 0.001, const double &start = 0);
-
-double findIntegral(const std::function<double (const double&)> &function, const double &start, const double &end, const double &precision = 0.001);
 
 namespace Ui {
 class FunctionApproximationTabWidget;
