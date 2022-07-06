@@ -53,12 +53,17 @@ QVector<Function> ExperimentAnalyzer::extractOscillations(const Function &experi
         double functionStep = experiment.getStep();
         double firstDerivative = (experiment.getValue(index) - experiment.getValue(index - 1)) / functionStep;
         if (firstDerivative >= derivativeGate) {
-            double firstDerivativesSum = 0;
-            for (unsigned int i = index + 1; i < std::min(experiment.size(), static_cast<unsigned int>(index + 6)); i++) {
-                firstDerivativesSum += (experiment.getValue(i) - experiment.getValue(i - 1)) / functionStep;
+            unsigned int checkingDerivativesGateIndex = std::min(experiment.size(), static_cast<unsigned int>(index + 16));
+            double DerivativesSum = 0;
+            double AbsoluteDerivativesSum = 0;
+            for (unsigned int i = index + 1; i < checkingDerivativesGateIndex; i++) {
+                DerivativesSum += (experiment.getValue(i) - experiment.getValue(i - 1)) / functionStep;
+                AbsoluteDerivativesSum += std::abs(DerivativesSum);
             }
-            if (firstDerivativesSum < 3 * firstDerivative) {
-                derivativeGate = firstDerivative;
+            if (DerivativesSum < 3 * firstDerivative && (DerivativesSum < AbsoluteDerivativesSum - 0.001 || AbsoluteDerivativesSum < 1.1 * firstDerivative)) {
+                if (firstDerivative < 4 * derivativeGate) {
+                    derivativeGate = firstDerivative;
+                }
                 continue;
             }
 
@@ -66,13 +71,20 @@ QVector<Function> ExperimentAnalyzer::extractOscillations(const Function &experi
             Function oscillation = {};
             int indent = 0;
             int startIndex = index;
+            while (index < static_cast<int>(experiment.size()) && oscillationStartValue == experiment.getValue(index)) {
+                index++;
+            }
+            if (oscillationStartValue > experiment.getValue(index)) {
+                continue;
+            }
+            oscillationStartValue = experiment.getValue(index);
             while (index < static_cast<int>(experiment.size()) && oscillationStartValue <= experiment.getValue(index)) {
                 index++;
             }
             if (index >= static_cast<int>(experiment.size())) {
                 break;
             }
-            if (index - startIndex < 5) {
+            if (index - startIndex <= 10) {
                 continue;
             }
             indent = (index - startIndex) * 15 / 100;
@@ -101,13 +113,15 @@ QVector<FunctionApproximation> ExperimentAnalyzer::calculateApproximations(const
         }
         firstOscillationApproximation = FunctionApproximation(coefficients);
         firstComponent = {0, 0, 0};
-        FunctionApproximation oscillationApproximation = approximator->approximate(oscillation, firstOscillationApproximation, firstComponent);
+        FunctionApproximation oscillationApproximation = approximator->approximate(oscillation, firstOscillationApproximation);
         if (!isFirstOscillationApproximationSet) {
             firstOscillationApproximation = oscillationApproximation;
             coefficients = oscillationApproximation.getCoefficients();
             isFirstOscillationApproximationSet = true;
         }
-        oscillationsApproximation.append(oscillationApproximation);
+        if (oscillationApproximation.getFirstComponentValue(oscillation.getKey(0)) > 0.001) {
+            oscillationsApproximation.append(oscillationApproximation);
+        }
         coefficients[2] -= oscillation.getKey(0);
         coefficients[5] -= oscillation.getKey(0);
     }
